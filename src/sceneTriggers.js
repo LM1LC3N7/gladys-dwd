@@ -9,6 +9,12 @@
 // evaluation of a house is a baseline (a restart in the middle of the birch
 // season must not fire every scene again).
 //
+// "Air quality level changed": the UBA index (0 to 4, hourly) is already
+// discrete; one event per crossed level, after a baseline. The index
+// wavers between two classes from one hour to the next: an improvement is
+// only taken once two successive hours read the lower class, a worsening at
+// once (the advice matters then).
+//
 // "Warning issued" / "Warning ended": per area, the highest level of each
 // warning kind is compared with the previous evaluation, kept in /data: a
 // new kind or a higher level fires "issued" (the warning replacing a watch
@@ -19,7 +25,13 @@
 // is written once Gladys accepted the event, so a refused event fires again.
 // -----------------------------------------------------------------------------
 
-import { POLLEN_TRIGGER, WARNING_ENDED_TRIGGER, WARNING_ISSUED_TRIGGER } from './constants.js';
+import {
+  AIR_QUALITY_TRIGGER,
+  POLLEN_TRIGGER,
+  WARNING_ENDED_TRIGGER,
+  WARNING_ISSUED_TRIGGER,
+} from './constants.js';
+import { airQualityLevelOf, crossedAirQualityLevels, getAirQualityLevel } from './airQuality.js';
 import {
   POLLEN_NAMES,
   crossedPollenLevels,
@@ -30,7 +42,12 @@ import {
 } from './pollen.js';
 import { KIND_NAMES, LEVEL_NAMES, textLanguage, warningTitle, when } from './i18n.js';
 
-export const SCENE_TRIGGER_KEYS = [POLLEN_TRIGGER, WARNING_ISSUED_TRIGGER, WARNING_ENDED_TRIGGER];
+export const SCENE_TRIGGER_KEYS = [
+  POLLEN_TRIGGER,
+  AIR_QUALITY_TRIGGER,
+  WARNING_ISSUED_TRIGGER,
+  WARNING_ENDED_TRIGGER,
+];
 
 export class PollenTracker {
   constructor() {
@@ -78,6 +95,77 @@ export class PollenTracker {
         value: peak.value,
         pollen: names,
         region: pollen.region.name,
+        house: house.name ?? '',
+        summary,
+      },
+    }));
+  }
+}
+
+export class AirQualityTracker {
+  constructor() {
+    // house key -> { level, pending: the lower level read once, datetime }
+    this.state = new Map();
+  }
+
+  forget(houseKey) {
+    this.state.delete(houseKey);
+  }
+
+  /**
+   * Evaluate the air quality of one house and return the events to publish.
+   * @param {{ key: string, name?: string }} house
+   * @param {object | undefined} airQuality see src/sources/ubaAirQuality.js
+   * @param {{ language?: string }} preferences of the user
+   */
+  evaluate(house, airQuality, { language } = {}) {
+    const current = airQuality?.current;
+    const read = airQualityLevelOf(current?.index);
+    if (!read) {
+      return [];
+    }
+    const state = this.state.get(house.key);
+    if (!state) {
+      this.state.set(house.key, { level: read, datetime: current.datetime });
+      return []; // baseline
+    }
+    if (current.datetime === state.datetime) {
+      return []; // the same hour again
+    }
+    const previous = state.level;
+    let level = read;
+    if (getAirQualityLevel(read).rank < getAirQualityLevel(previous).rank) {
+      // Better: wait for a second hour at that level (or lower).
+      const confirmed =
+        state.pending && getAirQualityLevel(state.pending).rank >= getAirQualityLevel(read).rank;
+      if (!confirmed) {
+        this.state.set(house.key, { level: previous, pending: read, datetime: current.datetime });
+        return [];
+      }
+    }
+    this.state.set(house.key, { level, datetime: current.datetime });
+    if (previous === level) {
+      return [];
+    }
+    const lang = textLanguage(language);
+    const details = getAirQualityLevel(level);
+    const main = current.main?.name?.[lang];
+    const where = airQuality.station.name;
+    const summary = {
+      en: `Air quality ${details.label.en.toLowerCase()} at ${where}${main ? ` (${main.toLowerCase()})` : ''}. ${details.advice.en}`,
+      fr: `Qualité de l’air ${details.label.fr.toLowerCase()} à ${where}${main ? ` (${main.toLowerCase()})` : ''}. ${details.advice.fr}`,
+      de: `Luftqualität ${details.label.de.toLowerCase()} in ${where}${main ? ` (${main})` : ''}. ${details.advice.de}`,
+    }[lang];
+    return crossedAirQualityLevels(previous, level).map(({ level: crossed, direction }) => ({
+      key: AIR_QUALITY_TRIGGER,
+      data: {
+        level: crossed,
+        direction,
+        previous_level: previous,
+        current_level: level,
+        index: current.index,
+        pollutant: main ?? '',
+        station: where,
         house: house.name ?? '',
         summary,
       },

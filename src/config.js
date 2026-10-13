@@ -10,8 +10,10 @@
 export const DEFAULT_CONFIG = {
   official_alerts: true,
   pollen_alerts: false,
+  air_quality_alerts: false,
   radar_image: true,
   station: '',
+  air_quality_station: '',
   warncell_ids: '',
 };
 
@@ -34,6 +36,14 @@ function stationId(value) {
   return /^[A-Z0-9]{3,6}$/.test(id) ? id : '';
 }
 
+// A UBA station code: "DE", the Land, three digits ("DEBE068").
+function airStationCode(value) {
+  const code = String(value ?? '')
+    .trim()
+    .toUpperCase();
+  return /^DE[A-Z]{2}\d{3}$/.test(code) ? code : '';
+}
+
 // "809180117, 103359000" -> the 9-digit ids, deduplicated, as one string.
 function warncellIds(value) {
   const ids = String(value ?? '')
@@ -49,7 +59,8 @@ export function normalizeConfig(raw = {}) {
       if (typeof fallback === 'boolean') {
         return [key, bool(raw?.[key], fallback)];
       }
-      return [key, key === 'warncell_ids' ? warncellIds(raw?.[key]) : stationId(raw?.[key])];
+      const normalize = { warncell_ids: warncellIds, air_quality_station: airStationCode }[key];
+      return [key, (normalize ?? stationId)(raw?.[key])];
     }),
   );
 }

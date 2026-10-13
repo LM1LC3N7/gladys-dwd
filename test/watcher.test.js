@@ -159,6 +159,41 @@ test('the pollen level fires one event per crossed level, after a baseline', asy
   }
 });
 
+test('the air quality level fires after a baseline, and a new hour nudges the widget', async () => {
+  const body = fixture('uba-airquality-DEBE068.json');
+  const { restore } = installFetch(berlinRoutes({ airQuality: body }));
+  const { clock, gladys, watcher } = setup();
+  try {
+    await watcher.tick();
+    assert.deepEqual(gladys.sceneEvents, []);
+    assert.ok(gladys.widgetRefreshes.includes('air_quality'));
+    gladys.widgetRefreshes.length = 0;
+    // The next hour reads "poor": one event per crossed level, the widget moves.
+    body.data['175']['2026-10-13 03:00:00'][1] = 3;
+    clock.now += 60 * 60_000;
+    await watcher.tick();
+    assert.deepEqual(
+      gladys.sceneEvents.map((e) => [e.key, e.data.level, e.data.direction]),
+      [
+        ['air_quality_level_changed', 'moderate', 'worsening'],
+        ['air_quality_level_changed', 'poor', 'worsening'],
+      ],
+    );
+    assert.equal(gladys.sceneEvents[0].data.station, 'Berlin Mitte');
+    assert.equal(gladys.sceneEvents[0].data.house, 'Home');
+    assert.ok(gladys.sceneEvents[0].data.summary.startsWith('Qualité de l’air mauvaise'));
+    assert.ok(gladys.widgetRefreshes.includes('air_quality'));
+    // The same hour again: nothing.
+    gladys.widgetRefreshes.length = 0;
+    clock.now += 16 * 60_000;
+    await watcher.tick();
+    assert.equal(gladys.sceneEvents.length, 2);
+    assert.ok(!gladys.widgetRefreshes.includes('air_quality'));
+  } finally {
+    restore();
+  }
+});
+
 test('a refused scene event never breaks the loop', async () => {
   const body = fixture('pollen-s31fg.json');
   const { restore } = installFetch(berlinRoutes({ routes: [[/s31fg\.json/, () => json(body)]] }));

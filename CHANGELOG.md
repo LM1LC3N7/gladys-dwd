@@ -10,6 +10,26 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+### Added
+
+- "Air quality" widget: the hourly index of the Umweltbundesamt at the
+  measuring station nearest to the house (50 km at most), pollutant by
+  pollutant, the worst hour of the day, the station and its type, the
+  advice of the level; the station can be forced in the configuration.
+- Scene trigger "air quality level changed" (very good to very poor, one
+  event per crossed level, an improvement confirmed by a second hour), and
+  the optional air quality alert from "poor" on.
+- The house of a widget or a scene trigger is picked in the list of the
+  houses of Gladys instead of typed (Gladys 5.2 or newer); the warnings
+  widget takes a warn cell in its own setting.
+
+### Changed
+
+- "Pollen" widget: only the pollen in the air are listed, highest first;
+  out of season one line says that none of the eight is in the air
+  (feedback of the forum).
+- Requires Gladys 5.2.0 or newer (the house lists).
+
 ## [1.1.0] - 2026-10-13
 
 ### Added

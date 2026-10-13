@@ -4,8 +4,8 @@ Diese Integration macht den **Deutschen Wetterdienst** (DWD) zum
 Wetteranbieter von Gladys. Das Wetter-Widget des Dashboards und die
 Assistentin („Wie wird das Wetter morgen?“) nutzen seine MOSMIX-Vorhersagen
 und seine stündlichen Beobachtungen. Dazu kommt, was man in Deutschland
-braucht: die **amtlichen Warnungen**, der **Pollenindex**, der **UV-Index**
-und das Regenradar.
+braucht: die **amtlichen Warnungen**, der **Pollenindex**, der **UV-Index**,
+das Regenradar und, vom Umweltbundesamt, der **Luftqualitätsindex**.
 
 Nichts einzugeben, kein Konto, kein Schlüssel: alles kommt von den
 Open-Data-Servern des DWD, für den Standort deines Zuhauses. Vorhersagen und
@@ -17,15 +17,15 @@ Pollen, UV und Radar gelten für **Deutschland**.
 
 ## Installation
 
-1. Installiere die Integration aus dem Gladys-Katalog (Gladys 5.1 oder
+1. Installiere die Integration aus dem Gladys-Katalog (Gladys 5.2 oder
    neuer).
 2. Erlaube den Zugriff auf den **Standort deiner Häuser**: das Wetter ist das
    des Zuhauses, sonst ist nichts einzugeben.
 3. Prüfe, dass dein Zuhause auf der Karte steht (**Einstellungen →
    Zuhause**). Ohne Standort gibt es kein Wetter.
 4. Klicke in der **Konfiguration** auf **DWD-Quellen testen**: die Meldung
-   sagt, was jede Quelle geantwortet hat (Vorhersage, Warnungen, Pollen) und
-   welche Stationen genutzt werden.
+   sagt, was jede Quelle geantwortet hat (Vorhersage, Warnungen, Pollen,
+   Luftqualität) und welche Stationen genutzt werden.
 5. Optional: trage **Warnzellen** ein (Ferienhaus, Wohnort der Eltern, ein
    ganzer Landkreis) über ihre DWD-ID; der Knopf **Warnzelle suchen** findet
    Gemeinden nach Namen.
@@ -52,6 +52,9 @@ OpenWeather-Dienst vor. Das Wetter-Widget kann sie auch ausdrücklich wählen.
 - **UV-Index**: das vorhergesagte Tagesmaximum der nächsten von 38
   deutschen Städten, nach dem Sonnenstand über den Tag verteilt.
 - **Radar**: das Niederschlagskomposit des DWD, 1 km, alle 5 Minuten.
+- **Luftqualität**: der stündliche Index des **Umweltbundesamtes** an der
+  Messstation, die deinem Zuhause am nächsten liegt (höchstens 50 km), aus
+  den Messnetzen der Länder.
 
 Die gefühlte Temperatur ist die scheinbare Temperatur nach Steadman
 (Lufttemperatur, Feuchte und Wind), die des australischen Wetterdienstes:
@@ -73,12 +76,21 @@ der DWD veröffentlicht keine in seinen offenen Daten.
   der Pollenindex deiner Region eine mittlere Belastung erreicht (2 auf der
   DWD-Skala), bei hoher Belastung (3) mit der Schwere „mäßig“. Keine
   amtliche Warnung.
+- **Luftqualitätswarnungen** (standardmäßig aus) — fügt eine Warnung
+  hinzu, wenn der Luftqualitätsindex an der nächsten Station „schlecht“
+  erreicht (3 auf der Skala des Umweltbundesamtes), bei „sehr schlecht“ (4)
+  mit der Schwere „schwer“. Keine amtliche Warnung.
 - **Regenradar** (standardmäßig an) — ein Radarbild von 300 × 200 km um
   dein Zuhause. Schalte im Wetter-Widget „Bilder des Anbieters“ ein, um es
   zu sehen. Deutschland und Grenzgebiete.
 - **Vorhersagestation (erweitert)** — leer wird die nächste MOSMIX-Station
   genutzt. Für eine andere ihre ID aus dem Stationskatalog des DWD
   (`10384` für Berlin-Tempelhof, `A051` für einen lokalen Punkt).
+- **Luftmessstation (erweitert)** — leer wird die nächste Messstation des
+  Umweltbundesamtes genutzt (eine Verkehrsstation an einer belebten Straße
+  misst schlechter als die Luft zu Hause: erzwinge bei Bedarf eine
+  Hintergrundstation). Ihr Code (`DEBE068` für Berlin Mitte) steht auf
+  luftdaten.umweltbundesamt.de.
 
 ## Das Widget „DWD-Warnungen“
 
@@ -93,8 +105,9 @@ Für ein Zuhause in Deutschland oder eine eingetragene Warnzelle:
   **Text mit Verhaltenshinweisen** im Detailfenster; der Titel ist die
   amtliche Überschrift.
 
-Einstellung **Zuhause oder Warnzelle**: der Name des Zuhauses oder eine
-Warnzellen-ID aus der Konfiguration. Leer: das erste beobachtete Gebiet.
+Einstellungen: **Zuhause**, aus der Liste der Häuser von Gladys gewählt
+(leer: das erste beobachtete Gebiet), oder **Stattdessen eine Warnzelle**,
+eine Warnzellen-ID aus der Konfiguration, die dem Zuhause vorgeht.
 
 ## Das Widget „Pollen“
 
@@ -105,7 +118,8 @@ Deutschlands, heute, morgen und übermorgen. Das Widget zeigt:
 - die **Belastung heute** auf einer Anzeige, mit der Stufe des stärksten
   Pollens;
 - die Spitzen von **morgen** und **übermorgen**;
-- jeden heute fliegenden Pollen mit Wert und Stufe;
+- die heute fliegenden Pollen, die stärksten zuerst, mit Wert und Stufe
+  (außerhalb der Saison sagt eine Zeile, dass keiner der acht fliegt);
 - die **Hinweise** zur Stufe.
 
 | Index | Stufe  |
@@ -118,9 +132,44 @@ Deutschlands, heute, morgen und übermorgen. Das Widget zeigt:
 Zwischenwerte („1-2“) werden aufgerundet. Der Index erscheint einmal am
 Tag gegen 11 Uhr; davor gilt die Vorhersage vom Vortag.
 
+Einstellung **Zuhause**: aus der Liste gewählt; leer das erste Zuhause mit
+Standort.
+
+## Das Widget „Luftqualität“
+
+Der **Luftqualitätsindex** des Umweltbundesamtes wird jede Stunde an jeder
+Messstation aus dem schlechtesten ihrer Schadstoffe berechnet:
+Stickstoffdioxid und Ozon (Stundenmittel), Feinstaub PM10 und PM2,5
+(gleitende 24-Stunden-Mittel). Das Widget zeigt für die Station, die deinem
+Zuhause am nächsten liegt (höchstens 50 km):
+
+- die **Stufe jetzt** (die letzte vollständige Stunde, ein bis zwei Stunden
+  Verzug);
+- die **schlechteste Stufe der letzten 24 Stunden**, wenn sie schlechter
+  war;
+- jeden gemessenen **Schadstoff** mit Konzentration und eigener Stufe;
+- die Station, ihre Art (Hintergrund, Verkehr, Industrie) und Entfernung,
+  die Uhrzeit der Messung;
+- die **Hinweise** zur Stufe, die des Umweltbundesamtes.
+
+| Index | Stufe         |
+| ----- | ------------- |
+| 0     | Sehr gut      |
+| 1     | Gut           |
+| 2     | Mäßig         |
+| 3     | Schlecht      |
+| 4     | Sehr schlecht |
+
+Der Index ist der schlechteste der Schadstoffe: „gute“ Luft mit einem
+„mäßigen“ Schadstoff liest sich „mäßig“. Die Messung heißt
+„unvollständig“, wenn ein Schadstoff der Station in dieser Stunde fehlt.
+
+Einstellung **Zuhause**: aus der Liste gewählt; leer das erste Zuhause mit
+Standort.
+
 ## Szenen
 
-Drei Auslöser, alle 5 Minuten geprüft:
+Vier Auslöser, alle 5 Minuten geprüft:
 
 - **DWD-Warnung ausgegeben** — der DWD hat eine Warnung für ein Gebiet (ein
   Zuhause in Deutschland oder eine Warnzelle) ausgegeben, ihre Stufe erhöht
@@ -136,6 +185,13 @@ Drei Auslöser, alle 5 Minuten geprüft:
   Filter: Gebiet, Warnarten.
 - **Pollenbelastung geändert** — der Pollenindex eines Zuhauses (sein
   stärkster Pollen des Tages) erreicht eine neue Stufe.
+- **Luftqualitätsstufe geändert** — der Luftqualitätsindex an der nächsten
+  Station eines Zuhauses erreicht eine neue Stufe: sofort, wenn die Luft
+  schlechter wird, nach zwei Stunden auf der besseren Stufe, wenn sie
+  besser wird (der Index pendelt von Stunde zu Stunde zwischen zwei
+  Klassen). Filter: **Stufe**, **Richtung**, **Zuhause**. Variablen:
+  `level`, `index` (0 bis 4), `pollutant` (der Schadstoff, der den Index
+  bestimmt), `station`, `summary`, `house`.
 
 Warnungen werden nach Art und Stufe verglichen, nie nach der DWD-Kennung
 (eine aktualisierte Warnung bekommt eine neue): eine Aktualisierung auf
@@ -162,7 +218,7 @@ Pollenfilter, alle optional:
 - **Erreichte Stufe** — z. B. „Hoch“. Die Szene läuft auch, wenn der Index
   diese Stufe überspringt (von „keine“ auf „hoch“).
 - **Richtung** — „Verschlechterung“ oder „Besserung“.
-- **Zuhause** — der genaue Name in Gladys (leer = alle).
+- **Zuhause** — aus der Liste der Häuser von Gladys gewählt (leer = alle).
 
 Die folgenden Aktionen können `{{triggerEvent.data.summary}}` (ein fertiger
 Satz), `{{triggerEvent.data.pollen}}` (die Pollen dieser Stufe),
@@ -175,8 +231,8 @@ in der Saison darf nicht jede Szene wiederholen).
 ## Gut zu wissen
 
 - **Außerhalb Deutschlands**: Vorhersage und Beobachtungen gehen überall,
-  wo MOSMIX eine Station hat (ganz Europa); Warnungen, Pollen, UV-Index und
-  Radar melden sich als nicht verfügbar.
+  wo MOSMIX eine Station hat (ganz Europa); Warnungen, Pollen, UV-Index,
+  Luftqualität und Radar melden sich als nicht verfügbar.
 - Weit weg von jeder Station (auf See, außerhalb Europas) sagt es die
   Integration in der Konfiguration.
 - MOSMIX enthält keinen UV-Index: er kommt aus der Tagesvorhersage des DWD
@@ -184,7 +240,8 @@ in der Saison darf nicht jede Szene wiederholen).
 - Antwortet der DWD nicht, bleibt das letzte bekannte Wetter bis zu
   6 Stunden sichtbar.
 - Die Daten werden 15 Minuten zwischengespeichert (5 für Warnungen und
-  Radar, 1 Stunde für Pollen- und UV-Index).
+  Radar, 1 Stunde für Pollen- und UV-Index, 15 Minuten für den
+  Luftqualitätsindex und einen Tag für die Liste seiner Stationen).
 
 ## Quellen und Lizenzen
 
@@ -192,5 +249,8 @@ Daten: Deutscher Wetterdienst, Open Data (GeoNutzungsverordnung, Quelle
 „Datenbasis: Deutscher Wetterdienst“): MOSMIX-Vorhersagen, stündliche
 Beobachtungen, Warnungen, Pollen- und UV-Index, Radarkomposit; Grenzen im
 Radarbild: GeoBasis-DE / BKG. Die Pollenhinweise stammen von der
-Integration, nicht vom DWD. Diese Integration ist weder mit dem Deutschen
-Wetterdienst verbunden noch von ihm unterstützt.
+Integration, nicht vom DWD. Luftqualität: Umweltbundesamt, Luftdaten der
+Messnetze der Länder und des UBA (Datenlizenz Deutschland – Namensnennung –
+2.0); die Hinweise sind die des Umweltbundesamtes, gekürzt. Diese
+Integration ist weder mit dem Deutschen Wetterdienst noch mit dem
+Umweltbundesamt verbunden oder von ihnen unterstützt.

@@ -5,10 +5,18 @@
 - [x] Check the CI (Docker build, Node 22 and 24).
 - [ ] Turn on "Private vulnerability reporting" (SECURITY.md points there).
 - [ ] Run the store validator once the image is published.
-- [ ] Test on a real Gladys 5.1+: widgets rendering, the pollen trigger in
-      the scene editor, the radar in the weather widget, warning nudges.
+- [x] Test on a real Gladys 5.1+: widgets rendering, the pollen trigger in
+      the scene editor, the radar in the weather widget, warning nudges
+      (ruegerth on the forum, 2026-10-13: warnings and pollen widgets work).
+- [ ] Check the house lists (`source: "houses"`) in the widget settings and
+      the scene editor on a real Gladys 5.2.
 
 ## To check when it happens
+
+- [ ] The air quality index at a "very poor" hour (never seen yet): the
+      alert, the trigger and the widget colours.
+- [ ] The UBA clock around the summer time change (the API says CET all
+      year: the hours must not shift by one in the widget).
 
 - [ ] A warning with an altitude band on a real house (the band is said in
       metres in the description).

@@ -1,23 +1,28 @@
 // -----------------------------------------------------------------------------
-// Dashboard widgets "DWD warnings" and "Pollen" (manifest `widgets`, Gladys
-// 5.1+).
+// Dashboard widgets "DWD warnings", "Pollen" and "Air quality" (manifest
+// `widgets`, Gladys 5.2+).
 //
 // DWD warnings: the levels now and later as two tiles, then the warnings in
 // force and announced of an area (a house in Germany or a typed warn cell),
 // most important first, each with its period, a level badge and the official
 // text behind a tap.
 //
-// Pollen: the DWD pollen index for today, tomorrow and the day after, pollen
-// by pollen, with the advice of the level.
+// Pollen: the DWD pollen index for today, tomorrow and the day after, the
+// pollen in the air, with the advice of the level.
+//
+// Air quality: the UBA index of the hour at the nearest measuring station,
+// pollutant by pollutant, the worst hour of the day, with the advice.
 //
 // The content is declarative (core vocabulary, no HTML); `onWidgetGet`
-// receives no coordinates: the area comes from the `house` setting (house
-// name, selector, cell id or cell name; empty = first area), resolved
-// against the watcher. Budget of the core: 8 components, 2 texts at most.
+// receives no coordinates: the house comes from the `house` setting (a
+// house picked in Gladys, its selector; empty = first house), the warnings
+// widget also takes a warn cell id (`cell`), resolved against the watcher.
+// Budget of the core: 8 components, 2 texts at most.
 // -----------------------------------------------------------------------------
 
 import { WIDGET_COLORS, createLogger } from '@gladysassistant/integration-sdk';
-import { POLLEN_WIDGET, WARNINGS_WIDGET } from './constants.js';
+import { AIR_QUALITY_WIDGET, POLLEN_WIDGET, WARNINGS_WIDGET } from './constants.js';
+import { airQualityLevelOf, getAirQualityLevel } from './airQuality.js';
 import {
   POLLEN_KEYS_IN_SEASON_ORDER,
   POLLEN_NAMES,
@@ -68,9 +73,9 @@ function message(text) {
 }
 
 const OUTSIDE_GERMANY = {
-  en: 'The DWD warnings and pollen index cover Germany only: this house is outside.',
-  fr: 'Les avertissements et l’indice pollinique du DWD ne couvrent que l’Allemagne : cette maison est en dehors.',
-  de: 'Die DWD-Warnungen und der Pollenindex gelten nur für Deutschland: dieses Zuhause liegt außerhalb.',
+  en: 'The DWD warnings, the pollen and the air quality indices cover Germany only: this house is outside.',
+  fr: 'Les avertissements du DWD, l’indice pollinique et la qualité de l’air ne couvrent que l’Allemagne : cette maison est en dehors.',
+  de: 'DWD-Warnungen, Pollenindex und Luftqualität gelten nur für Deutschland: dieses Zuhause liegt außerhalb.',
 };
 
 function noHouse(name) {
@@ -253,12 +258,16 @@ export function buildPollenContent(pollen, { today }) {
       });
     }
   }
-  // The pollen in the air, highest first; the rest left out when at zero.
-  const items = POLLEN_KEYS_IN_SEASON_ORDER.map((key) => ({ key, value: current.values[key] }))
-    .filter((e) => Number.isFinite(e.value))
+  // Only the pollen in the air, highest first: out of season, every pollen
+  // is at zero and a list of zeros says less than one line.
+  const known = POLLEN_KEYS_IN_SEASON_ORDER.map((key) => ({
+    key,
+    value: current.values[key],
+  })).filter((e) => Number.isFinite(e.value));
+  const items = known
+    .filter((e) => e.value > 0)
     .sort((a, b) => b.value - a.value)
-    .filter((e, i) => e.value > 0 || i < 3)
-    .slice(0, 8)
+    .slice(0, 6)
     .map((e) => {
       const levelKey = pollenLevelOf(e.value);
       const details = getPollenLevel(levelKey);
@@ -269,10 +278,119 @@ export function buildPollenContent(pollen, { today }) {
         color: pollenColor(levelKey),
       };
     });
+  if (items.length === 0) {
+    items.push({
+      label: { en: 'In the air', fr: 'Dans l’air', de: 'In der Luft' },
+      value: {
+        en: `None of the ${known.length} pollen`,
+        fr: `Aucun des ${known.length} pollens`,
+        de: `Keiner der ${known.length} Pollen`,
+      },
+      icon: 'feather',
+      color: WIDGET_COLORS.SUCCESS,
+    });
+  }
   items.push({
     label: { en: 'Region', fr: 'Région', de: 'Region' },
     value: truncate(pollen.region.name, 40),
     icon: 'map-pin',
+    color: WIDGET_COLORS.NEUTRAL,
+  });
+  components.push({ type: 'status', items });
+  components.push({ type: 'text', variant: 'body', text: level.advice });
+  return { ttl_seconds: CONTENT_TTL, components };
+}
+
+/** Theme color of a UBA air quality level. */
+export function airQualityColor(levelKey) {
+  return (
+    {
+      very_good: WIDGET_COLORS.SUCCESS,
+      good: WIDGET_COLORS.SUCCESS,
+      moderate: WIDGET_COLORS.WARNING,
+      poor: WIDGET_COLORS.DANGER,
+      very_poor: WIDGET_COLORS.DANGER,
+    }[levelKey] ?? WIDGET_COLORS.NEUTRAL
+  );
+}
+
+const SETTING_NAMES = {
+  background: { en: 'background', fr: 'fond', de: 'Hintergrund' },
+  traffic: { en: 'traffic', fr: 'trafic', de: 'Verkehr' },
+  industry: { en: 'industry', fr: 'industrie', de: 'Industrie' },
+};
+
+/**
+ * Build the air quality widget content (pure: tested without network).
+ * @param {object} airQuality see src/sources/ubaAirQuality.js
+ * @param {{ timeZone?: string }} options local time of the house
+ */
+export function buildAirQualityContent(airQuality, { timeZone = 'Europe/Berlin' } = {}) {
+  const { current, peak, station } = airQuality;
+  const levelKey = airQualityLevelOf(current.index);
+  const level = getAirQualityLevel(levelKey);
+  const color = airQualityColor(levelKey);
+  const components = [
+    {
+      type: 'text',
+      variant: 'heading',
+      text: all(
+        (l) =>
+          `${{ en: 'Air quality', fr: 'Qualité de l’air', de: 'Luftqualität' }[l]} · ${level.label[l]}`,
+      ),
+    },
+    {
+      type: 'value',
+      label: all((l) => WORDS[l].now),
+      value: level.label,
+      icon: 'wind',
+      color,
+    },
+  ];
+  if (peak && peak.index > current.index) {
+    const peakLevel = getAirQualityLevel(airQualityLevelOf(peak.index));
+    components.push({
+      type: 'value',
+      label: { en: 'Worst (24 h)', fr: 'Pire (24 h)', de: 'Schlechteste (24 h)' },
+      value: peakLevel.label,
+      icon: 'trending-up',
+      color: airQualityColor(peakLevel.key),
+    });
+  }
+  // The pollutants, worst first.
+  const items = [...current.components]
+    .sort((a, b) => b.index - a.index)
+    .slice(0, 5)
+    .map((c) => {
+      const itemLevel = getAirQualityLevel(airQualityLevelOf(c.index));
+      return {
+        label: c.pollutant.name,
+        value: all(
+          (l) => `${c.pollutant.symbol} ${c.value} ${c.pollutant.unit} · ${itemLevel.label[l]}`,
+        ),
+        icon: 'activity',
+        color: airQualityColor(itemLevel.key),
+      };
+    });
+  const km = Math.round(station.distanceKm ?? 0);
+  const setting = SETTING_NAMES[station.setting];
+  items.push({
+    label: { en: 'Station', fr: 'Station', de: 'Station' },
+    value: all((l) =>
+      truncate(`${station.name}${setting ? ` (${setting[l]})` : ''}, ${km} km`, 60),
+    ),
+    icon: 'map-pin',
+    color: WIDGET_COLORS.NEUTRAL,
+  });
+  const at = clock(Date.parse(current.datetime), timeZone);
+  items.push({
+    label: { en: 'Measured', fr: 'Mesure', de: 'Messung' },
+    value: all((l) =>
+      current.incomplete
+        ? { en: `${at} (partial)`, fr: `${at} (partielle)`, de: `${at} (unvollständig)` }[l]
+        : at,
+    ),
+    icon: 'clock',
     color: WIDGET_COLORS.NEUTRAL,
   });
   components.push({ type: 'status', items });
@@ -288,10 +406,12 @@ export function createWidgets({ provider, watcher, rememberPreferences, now = Da
     [WARNINGS_WIDGET]: {
       async get({ settings = {}, language, units }) {
         rememberPreferences({ language, units });
-        const area = watcher.findArea(settings.house);
+        // A typed cell wins over the house (the house list cannot name a cell).
+        const wanted = String(settings.cell ?? '').trim() || settings.house;
+        const area = watcher.findArea(wanted);
         if (!area) {
-          const house = watcher.findHouse(settings.house);
-          return house ? message(OUTSIDE_GERMANY) : noHouse(settings.house);
+          const house = watcher.findHouse(wanted);
+          return house ? message(OUTSIDE_GERMANY) : noHouse(wanted);
         }
         try {
           const alerts = await provider.getAlertsFor(area);
@@ -336,7 +456,28 @@ export function createWidgets({ provider, watcher, rememberPreferences, now = Da
         return buildPollenContent(pollen, { today });
       },
     },
+    [AIR_QUALITY_WIDGET]: {
+      async get({ settings = {}, language, units }) {
+        rememberPreferences({ language, units });
+        const house = watcher.findHouse(settings.house);
+        if (!house) {
+          return noHouse(settings.house);
+        }
+        if (!isInGermanyArea(house.latitude, house.longitude)) {
+          return message(OUTSIDE_GERMANY);
+        }
+        const airQuality = await provider.getAirQuality(house.latitude, house.longitude);
+        if (!airQuality) {
+          return message({
+            en: 'No measuring station within 50 km, or no recent index from the Umweltbundesamt.',
+            fr: 'Aucune station de mesure à moins de 50 km, ou pas d’indice récent de l’Umweltbundesamt.',
+            de: 'Keine Messstation im Umkreis von 50 km, oder kein aktueller Index vom Umweltbundesamt.',
+          });
+        }
+        return buildAirQualityContent(airQuality, { timeZone: house.timeZone });
+      },
+    },
   };
 }
 
-export const WIDGET_KEYS = [WARNINGS_WIDGET, POLLEN_WIDGET];
+export const WIDGET_KEYS = [WARNINGS_WIDGET, POLLEN_WIDGET, AIR_QUALITY_WIDGET];

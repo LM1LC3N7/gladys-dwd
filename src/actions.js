@@ -15,6 +15,8 @@ import { formatPollen, peakPollen } from './pollen.js';
 import { NoStationError } from './provider.js';
 import { fetchCellWarnings, fetchWarnings, searchCells } from './sources/dwdWarnings.js';
 import { fetchPollen, fetchPollenRegion } from './sources/dwdPollen.js';
+import { fetchAirQuality } from './sources/ubaAirQuality.js';
+import { getAirQualityLevel, airQualityLevelOf } from './airQuality.js';
 
 const logger = createLogger({ name: 'actions' });
 
@@ -82,9 +84,9 @@ export function createActions({ watcher, provider, getConfig, now = Date.now }) 
         if (!isInGermanyArea(latitude, longitude)) {
           results.push(
             both(
-              'Warnings and pollen: not available outside Germany',
-              'Avertissements et pollens : indisponibles hors d’Allemagne',
-              'Warnungen und Pollen: außerhalb Deutschlands nicht verfügbar',
+              'Warnings, pollen and air quality: not available outside Germany',
+              'Avertissements, pollens et qualité de l’air : indisponibles hors d’Allemagne',
+              'Warnungen, Pollen und Luftqualität: außerhalb Deutschlands nicht verfügbar',
             ),
           );
         } else {
@@ -114,6 +116,26 @@ export function createActions({ watcher, provider, getConfig, now = Date.now }) 
                 en: ` (${region.name}, index ${index})`,
                 fr: ` (${region.name}, indice ${index})`,
                 de: ` (${region.name}, Index ${index})`,
+              };
+            }),
+          );
+          results.push(
+            await probe(both('Air quality', 'Qualité de l’air', 'Luftqualität'), async () => {
+              const station = await provider.findAirStation(latitude, longitude);
+              if (!station) {
+                return both(
+                  ' (no measuring station within 50 km)',
+                  ' (aucune station de mesure à moins de 50 km)',
+                  ' (keine Messstation im Umkreis von 50 km)',
+                );
+              }
+              const air = await fetchAirQuality(station, { timeout, now: now() });
+              const level = getAirQualityLevel(airQualityLevelOf(air?.current?.index));
+              const km = Math.round(station.distanceKm);
+              return {
+                en: ` (${station.name}, ${km} km, ${level?.label.en ?? 'no recent index'})`,
+                fr: ` (${station.name}, ${km} km, ${level?.label.fr ?? 'pas d’indice récent'})`,
+                de: ` (${station.name}, ${km} km, ${level?.label.de ?? 'kein aktueller Index'})`,
               };
             }),
           );

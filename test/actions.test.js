@@ -37,6 +37,8 @@ test('test_sources reports each source', async () => {
     );
     assert.match(result.en, /Warnings: OK, 2 in force/);
     assert.match(result.en, /Pollen: OK \(Brandenburg und Berlin, index 0-1\)/);
+    assert.match(result.en, /Air quality: OK \(Berlin Mitte, 1 km, Good\)/);
+    assert.match(result.de, /Luftqualität: OK \(Berlin Mitte, 1 km, Gut\)/);
     assert.match(result.fr, /Prévisions : OK/);
   } finally {
     restore();

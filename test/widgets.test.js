@@ -123,6 +123,26 @@ test('the widgets resolve the house and answer outside Germany', async () => {
     const pollen = await widgets.pollen.get({ settings: { house: 'Home' } });
     assert.deepEqual(validateWidgetContent(pollen), []);
     assert.equal(pollen.components[0].text.en, 'Pollen · None');
+    // October: no pollen in the air, one line says so instead of zeros.
+    const pollenStatus = pollen.components.find((c) => c.type === 'status');
+    assert.equal(pollenStatus.items.length, 2);
+    assert.equal(pollenStatus.items[0].value.fr, 'Aucun des 8 pollens');
+    // The house comes as its selector from the houses list of Gladys.
+    const air = await widgets.air_quality.get({ settings: { house: 'home' }, language: 'de' });
+    assert.deepEqual(validateWidgetContent(air), []);
+    assert.equal(air.components[0].text.de, 'Luftqualität · Gut');
+    const airStatus = air.components.find((c) => c.type === 'status');
+    assert.equal(airStatus.items[0].value.en, 'NO₂ 29 µg/m³ · Good');
+    assert.equal(airStatus.items.at(-2).value.en, 'Berlin Mitte (background), 1 km');
+    assert.equal(airStatus.items.at(-1).value.en, '04:00 (partial)');
+    const airParis = await widgets.air_quality.get({ settings: { house: 'paris' } });
+    assert.ok(airParis.components[0].text.en.includes('Germany only'));
+    // A typed cell wins over the house in the warnings widget.
+    const cellSetting = await widgets.warnings.get({
+      settings: { house: 'home', cell: '103359000' },
+      language: 'en',
+    });
+    assert.ok(cellSetting.components.at(-1).text.en.includes('Kreis Stade'));
     const paris = await widgets.pollen.get({ settings: { house: 'Paris' } });
     assert.ok(paris.components[0].text.en.includes('Germany only'));
     const nowhere = await widgets.warnings.get({ settings: { house: 'Nowhere' } });

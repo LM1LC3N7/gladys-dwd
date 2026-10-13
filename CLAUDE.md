@@ -12,6 +12,7 @@ answers `onWeatherGet` with the pivot weather format (contract B.18 of the
 Gladys spec `docs/specs/external-integrations/capabilities/weather-type.md`)
 from the **Deutscher Wetterdienst** open data: MOSMIX forecasts and hourly
 observations (Europe), official warnings, pollen and UV indices and radar
+(Germany), plus the hourly **air quality index of the Umweltbundesamt**
 (Germany). Derived from `gladys-environment-canada` (same author). No key,
 no account. Unofficial: not affiliated with the DWD.
 
@@ -47,21 +48,23 @@ src/sources/dwdWarnings.js    WFS warnings at the point -> bilingual alerts
 src/sources/dwdPollen.js      WFS pollen region + s31fg.json -> 3 days of index
 src/sources/dwdUv.js          uvi.json + the 38 cities placed
 src/sources/dwdRadar.js       WMS composite + marker (pngjs)
+src/sources/ubaAirQuality.js  UBA stations (meta) + hourly index -> current, peak
+src/airQuality.js             UBA index levels, pollutants, crossings (pure)
 src/stations.js               data/stations.json: nearest forecast / observing station
 src/zip.js                    the smallest zip reader (one deflated entry)
 src/timezone.js               coordinates -> IANA zone (coarse outlines) -> offset
 src/conditions.js             WMO ww codes, poi keys, cloud cover -> pivot conditions
 src/apparent.js               Steadman apparent temperature, humidity/dew point
 src/pollen.js                 pollen names, levels, crossings (pure)
-src/assessment.js             the optional pollen alert
+src/assessment.js             the optional pollen and air quality alerts
 src/watcher.js                5-min loop over the areas (houses + typed warn cells):
                               warnings nudge, warning and pollen events, widget nudges;
                               minute clock for the widget
-src/sceneTriggers.js          pollen level tracker; warning tracker (memory in /data,
+src/sceneTriggers.js          pollen and air quality level trackers; warning tracker (memory in /data,
                               compared by kind and level, "ended" confirmed by the DWD)
 src/scenes.js                 "get_warnings" scene action (summary ready to send)
 src/store.js                  JSON files in /data (DWD_DATA_DIR locally), memory store for tests
-src/widgets.js                "warnings" and "pollen" widget contents
+src/widgets.js                "warnings", "pollen" and "air_quality" widget contents
 src/actions.js                "test_sources" and "find_warncell" buttons
 src/i18n.js                   runtime texts (en/fr/de), level and kind names, local times,
                               the DWD event name translator
@@ -114,6 +117,17 @@ happen only in `src/pivot.js` (and in the widget / scene texts).
   (styles `Laender_ocker`, `Laender_schwarz`…) can be composed in one
   GetMap; `dwd:Bundeslaender`, `dwd:Basislayer` answer "layer not defined"
   although the capabilities list them. STYLES needs one entry per layer.
+- **UBA air data** (`luftdaten.umweltbundesamt.de/api/air-data/v3`,
+  `www.umweltbundesamt.de/api/...` redirects there): `meta/json?use=
+airquality&date_from&time_from&date_to&time_to` lists the stations with an
+  index in the period (rows: id, code `DEBE068`, name, city, …, lon at 7,
+  lat at 8, setting name at 16: background / traffic / industry);
+  `airquality/json?station=<code>&date_from…` gives per hour
+  `[end, index 0-4, incomplete, [component, value, index, ratio]…]`
+  (components 5 NO2, 3 O3, 1 PM10, 9 PM2.5). Every time is CET WITHOUT
+  summer time ("MEZ"), `time_from=1`/`time_to=24` cover a day, the data
+  lag one to two hours. `airqualityindex/json` answers an HTML error.
+  Licence dl-de/by-2-0, attribution "Quelle: Umweltbundesamt" (see NOTICE).
 - **Licence**: GeoNutzungsverordnung, attribution "Datenbasis: Deutscher
   Wetterdienst", never the DWD logo (see NOTICE).
 
@@ -124,7 +138,7 @@ happen only in `src/pivot.js` (and in the widget / scene texts).
   DWD". Never use the DWD logo.
 - **Keys are forever**: manifest `config_schema`, `actions`, widget,
   scene-trigger, scene-action, pollen level keys (`none`, `low`, `moderate`,
-  `high`), warning kinds (`WARNING_KINDS`) and the `/data` file names are
+  `high`), air quality level keys (`very_good`… `very_poor`), warning kinds (`WARNING_KINDS`) and the `/data` file names are
   stored in user scenes, dashboards and data. Never rename them.
 - **No duplicate of a core trigger**: the official warnings also go through
   the pivot alerts (the core "weather alert" trigger); our triggers add the
@@ -151,10 +165,12 @@ happen only in `src/pivot.js` (and in the widget / scene texts).
   `version` in `package.json` or in the manifest, nor the `docker_image` tag.
 - **Changelog**: every user-visible change adds a line under
   `## [Unreleased]` in `CHANGELOG.md`.
+- **The house fields are `select` with `source: "houses"`** (the core lists
+  the houses, the value is the selector): it needs `gladys_version >=
+5.2.0`; `findHouse` / `findArea` still match a name for old dashboards.
 - **Manifest texts** are `{ en, fr }` objects; the catalog description holds
   10 to 100 characters per language; `test/manifest.test.js` ties the
-  manifest to the code. `source: "houses"` is refused by the store schema:
-  houses are matched by name.
+  manifest to the code.
 - **User-facing text** exists in English, French and German (`LANGUAGES`
   in `src/i18n.js`): manifest, widgets, scene events, action messages,
   `docs/{en,fr,de}.md` kept in sync (German says "du"). Comments explain
@@ -183,6 +199,14 @@ curl -s "$B/climate_environment/health/alerts/s31fg.json" -o test/fixtures/polle
 curl -s "$B/climate_environment/health/alerts/uvi.json" -o test/fixtures/uvi.json
 curl -s "https://maps.dwd.de/geoserver/dwd/ows?service=WFS&version=2.0.0&request=GetFeature&typeName=dwd:Pollenfluggebiete&outputFormat=application/json&propertyName=ID,GF,GEN&CQL_FILTER=INTERSECTS(THE_GEOM,POINT(52.5200%2013.4000))" \
   -o test/fixtures/pollen-region-berlin.json
+```
+
+```bash
+U=https://luftdaten.umweltbundesamt.de/api/air-data/v3
+curl -s "$U/meta/json?use=airquality&lang=en&date_from=2026-10-13&time_from=1&date_to=2026-10-13&time_to=24" \
+  -o /tmp/uba-meta.json   # then keep the stations within 45 km of Berlin (+ one far away)
+curl -s "$U/airquality/json?station=DEBE068&lang=en&date_from=2026-10-12&time_from=1&date_to=2026-10-13&time_to=24" \
+  -o test/fixtures/uba-airquality-DEBE068.json
 ```
 
 `warnings-berlin.json` is a real municipality answer re-shaped for Berlin

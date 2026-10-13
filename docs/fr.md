@@ -5,7 +5,8 @@ Cette intégration fait du **service météorologique national allemand**
 du tableau de bord et l’assistante (« quel temps fera-t-il demain ? »)
 utilisent ses prévisions MOSMIX et ses observations horaires. Elle ajoute ce
 qu’il faut en Allemagne : les **avertissements officiels**, l’**indice
-pollinique**, l’**indice UV** et le radar de précipitations.
+pollinique**, l’**indice UV**, le radar de précipitations et, de
+l’Umweltbundesamt, l’**indice de qualité de l’air**.
 
 Rien à saisir, ni compte ni clé : tout vient des serveurs de données ouvertes
 du DWD, pour la position de votre maison. Les prévisions et observations
@@ -17,7 +18,7 @@ pollens, UV et radar couvrent l’**Allemagne**.
 
 ## Installation
 
-1. Installez l’intégration depuis le catalogue de Gladys (Gladys 5.1 ou
+1. Installez l’intégration depuis le catalogue de Gladys (Gladys 5.2 ou
    plus récent).
 2. Acceptez l’accès à la **position de vos maisons** : la météo est celle de
    la maison, rien d’autre à saisir.
@@ -25,7 +26,8 @@ pollens, UV et radar couvrent l’**Allemagne**.
    Maisons**). Sans position, pas de météo.
 4. Dans l’écran **Configuration**, cliquez sur **Tester les sources du
    DWD** : le message dit ce que chaque source a répondu (prévisions,
-   avertissements, pollens) et quelles stations sont utilisées.
+   avertissements, pollens, qualité de l’air) et quelles stations sont
+   utilisées.
 5. Facultatif : ajoutez des **cellules d’alerte** (maison de vacances,
    ville des parents, district entier) par leur identifiant DWD ; le bouton
    **Trouver une cellule d’alerte** cherche les communes par leur nom.
@@ -53,6 +55,9 @@ intégré à Gladys. Le widget météo peut aussi la choisir explicitement.
   villes allemandes, réparti sur la journée selon le soleil.
 - **Radar** : le composite de précipitations du DWD, 1 km, toutes les
   5 minutes.
+- **Qualité de l’air** : l’indice horaire de l’**Umweltbundesamt** (l’agence
+  fédérale allemande de l’environnement) à la station de mesure la plus
+  proche de votre maison, à 50 km au plus, d’après les réseaux des Länder.
 
 La température ressentie est la température apparente de Steadman
 (température de l’air, humidité et vent), celle du service météo australien :
@@ -76,6 +81,11 @@ le DWD n’en publie pas dans ses données ouvertes.
   l’indice pollinique de votre région atteint une exposition moyenne (2 sur
   l’échelle du DWD), relevée en sévérité « modérée » à une exposition forte
   (3). Ce n’est pas un avertissement officiel.
+- **Alertes qualité de l’air** (désactivé par défaut) — ajoute une alerte
+  quand l’indice de qualité de l’air à la station la plus proche atteint
+  « mauvaise » (3 sur l’échelle de l’Umweltbundesamt), relevée en sévérité
+  « sévère » à « très mauvaise » (4). Ce n’est pas un avertissement
+  officiel.
 - **Radar de précipitations** (activé par défaut) — une image radar de
   300 × 200 km centrée sur votre maison. Activez l’option « images du
   fournisseur » du widget météo pour la voir. Allemagne et ses frontières.
@@ -83,6 +93,11 @@ le DWD n’en publie pas dans ses données ouvertes.
   est utilisée. Pour en forcer une autre, saisissez son identifiant du
   catalogue de stations du DWD (`10384` pour Berlin-Tempelhof, `A051` pour
   un point local).
+- **Station de qualité de l’air (avancé)** — vide, la station de mesure de
+  l’Umweltbundesamt la plus proche est utilisée (une station « trafic » sur
+  une rue passante lit plus mal que l’air chez vous : forcez une station de
+  fond si vous préférez). Son code (`DEBE068` pour Berlin Mitte) est sur
+  luftdaten.umweltbundesamt.de.
 
 ## Le widget « Avertissements DWD »
 
@@ -97,9 +112,9 @@ Pour une maison en Allemagne ou une cellule d’alerte saisie :
   avec ses conseils (en allemand) dans le panneau de détail ; en allemand,
   le titre est le titre officiel.
 
-Réglage **Maison ou cellule d’alerte** : le nom de la maison, ou un
-identifiant de cellule de la configuration. Vide, c’est la première zone
-suivie.
+Réglages : **Maison**, choisie dans la liste des maisons de Gladys (vide :
+la première zone suivie), ou **Cellule d’alerte à la place**, un identifiant
+de cellule de la configuration, qui l’emporte sur la maison.
 
 ## Le widget « Pollens »
 
@@ -111,7 +126,9 @@ Le widget montre :
 - l’**exposition du jour** sur une jauge, avec le niveau du pollen le plus
   présent ;
 - les pics de **demain** et d’**après-demain** ;
-- chaque pollen présent aujourd’hui avec sa valeur et son niveau ;
+- les pollens présents aujourd’hui, du plus présent au moins présent, avec
+  leur valeur et leur niveau (hors saison, une ligne dit qu’aucun des huit
+  n’est dans l’air) ;
 - les **conseils** du niveau.
 
 | Indice | Niveau  |
@@ -125,9 +142,43 @@ Les valeurs intermédiaires (« 1-2 ») sont arrondies au niveau supérieur.
 L’indice est publié une fois par jour vers 11 h ; avant, c’est la prévision
 de la veille qui s’applique.
 
+Réglage **Maison** : choisie dans la liste ; vide, la première maison
+localisée.
+
+## Le widget « Qualité de l’air »
+
+L’**indice de qualité de l’air** de l’Umweltbundesamt (Luftqualitätsindex)
+est calculé chaque heure à chaque station de mesure à partir du pire de ses
+polluants : dioxyde d’azote et ozone (moyennes horaires), particules PM10 et
+PM2,5 (moyennes glissantes sur 24 h). Le widget montre, pour la station la
+plus proche de votre maison (50 km au plus) :
+
+- le **niveau actuel** (la dernière heure complète, une à deux heures de
+  retard) ;
+- le **pire niveau des 24 dernières heures** quand il était pire ;
+- chaque **polluant** mesuré avec sa concentration et son propre niveau ;
+- la station, son type (fond, trafic, industrie) et sa distance, l’heure
+  de la mesure ;
+- les **conseils** du niveau, ceux de l’Umweltbundesamt.
+
+| Indice | Niveau        |
+| ------ | ------------- |
+| 0      | Très bonne    |
+| 1      | Bonne         |
+| 2      | Moyenne       |
+| 3      | Mauvaise      |
+| 4      | Très mauvaise |
+
+L’indice est le pire des polluants : un air « bon » avec un polluant
+« moyen » se lit « moyenne ». La mesure est dite « partielle » quand un
+polluant de la station manque pour cette heure.
+
+Réglage **Maison** : choisie dans la liste ; vide, la première maison
+localisée.
+
 ## Scènes
 
-Trois déclencheurs, vérifiés toutes les 5 minutes :
+Quatre déclencheurs, vérifiés toutes les 5 minutes :
 
 - **Avertissement DWD émis** — le DWD a émis un avertissement pour une zone
   (une maison en Allemagne ou une cellule d’alerte), relevé son niveau, ou
@@ -143,6 +194,13 @@ Trois déclencheurs, vérifiés toutes les 5 minutes :
   Filtres : zone, types.
 - **Niveau de pollens changé** — l’indice pollinique d’une maison (son
   pollen le plus présent du jour) atteint un nouveau niveau.
+- **Niveau de qualité de l’air changé** — l’indice de qualité de l’air à la
+  station la plus proche d’une maison atteint un nouveau niveau : tout de
+  suite quand l’air se dégrade, après deux heures au meilleur niveau quand
+  il s’améliore (l’indice oscille entre deux classes d’une heure à
+  l’autre). Filtres : **niveau**, **sens**, **maison**. Variables : `level`,
+  `index` (0 à 4), `pollutant` (celui qui fixe l’indice), `station`,
+  `summary`, `house`.
 
 Les avertissements sont comparés par type et niveau, jamais par
 l’identifiant du DWD (une mise à jour en reçoit un nouveau) : une mise à
@@ -169,7 +227,7 @@ Filtres pollens, tous facultatifs :
 - **Niveau atteint** — ex. « Forte ». La scène se déclenche même si l’indice
   saute ce niveau (de « aucune » à « forte »).
 - **Sens** — « Aggravation » ou « Amélioration ».
-- **Maison** — le nom exact de la maison dans Gladys (vide = toutes).
+- **Maison** — choisie dans la liste des maisons de Gladys (vide = toutes).
 
 Les actions suivantes peuvent lire `{{triggerEvent.data.summary}}` (une
 phrase prête à envoyer), `{{triggerEvent.data.pollen}}` (les pollens à ce
@@ -189,7 +247,7 @@ lui-même.
 
 - **Hors d’Allemagne** : les prévisions et observations fonctionnent partout
   où MOSMIX a une station (toute l’Europe) ; les avertissements, pollens,
-  indice UV et radar se disent indisponibles.
+  indice UV, qualité de l’air et radar se disent indisponibles.
 - Loin de toute station (en mer, hors d’Europe), l’intégration le dit dans
   l’écran Configuration.
 - Les prévisions MOSMIX n’ont pas d’indice UV : il vient de la prévision
@@ -197,7 +255,8 @@ lui-même.
 - Quand le DWD ne répond pas, la dernière météo connue reste affichée
   jusqu’à 6 heures.
 - Les données sont en cache 15 minutes (5 pour les avertissements et le
-  radar, 1 heure pour les indices pollinique et UV).
+  radar, 1 heure pour les indices pollinique et UV, 15 minutes pour
+  l’indice de qualité de l’air et un jour pour la liste de ses stations).
 
 ## Sources et licences
 
@@ -205,5 +264,8 @@ Données : Deutscher Wetterdienst, données ouvertes (GeoNutzungsverordnung,
 mention « Datenbasis: Deutscher Wetterdienst ») : prévisions MOSMIX,
 observations horaires, avertissements, indices pollinique et UV, composite
 radar ; frontières de l’image radar : GeoBasis-DE / BKG. Les conseils
-polliniques sont ceux de l’intégration, pas du DWD. Cette intégration n’est
-ni affiliée ni approuvée par le Deutscher Wetterdienst.
+polliniques sont ceux de l’intégration, pas du DWD. Qualité de l’air :
+Umweltbundesamt, données des réseaux de mesure des Länder et de l’UBA
+(Datenlizenz Deutschland – Namensnennung – 2.0) ; les conseils sont ceux
+de l’Umweltbundesamt, abrégés. Cette intégration n’est ni affiliée ni
+approuvée par le Deutscher Wetterdienst ou l’Umweltbundesamt.

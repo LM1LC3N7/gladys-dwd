@@ -26,9 +26,11 @@ pollen, UV and radar cover Germany.
 | "DWD warnings" widget: severity, period, description and advice                                  | `src/widgets.js`                                    |
 | "Pollen" widget: the DWD index today, tomorrow and the day after, pollen by pollen, advice       | `src/widgets.js`, `src/sources/dwdPollen.js`        |
 | Scene trigger "pollen level changed" (four levels, one event per crossed one)                    | `src/sceneTriggers.js`, `src/pollen.js`             |
+| "Air quality" widget: the Umweltbundesamt index of the hour at the nearest station, by pollutant | `src/widgets.js`, `src/sources/ubaAirQuality.js`    |
+| Scene trigger "air quality level changed" (five levels, worsening at once, improving confirmed)  | `src/sceneTriggers.js`, `src/airQuality.js`         |
 | UV index of the nearest of 38 German cities, spread over the day by the sun                      | `src/sources/dwdUv.js`, `src/provider.js`           |
 | DWD precipitation radar over the country borders (provider image `radar`)                        | `src/sources/dwdRadar.js`                           |
-| Option: pollen alerts (off by default)                                                           | `src/assessment.js`                                 |
+| Options: pollen and air quality alerts (off by default)                                          | `src/assessment.js`                                 |
 | Station table (Europe, about 4,300 MOSMIX stations, 630 observing), regenerated from the catalog | `data/stations.json`, `scripts/update-stations.mjs` |
 
 ## How it works
@@ -43,6 +45,7 @@ onWeatherGet(lat, lon, language, units)
        ├─ getAlerts (WFS dwd:Warnungen_Gemeinden at the point, cache 5 min)
        ├─ getPollen (only with the pollen alerts option)
        ├─ getUv (uvi.json of the nearest city, cache 1 h)
+       ├─ getAirQuality (only with the air quality alerts option)
        └─ toPivot (metric snapshot -> requested units and language)
 
 Watcher, every 5 min, per area (located houses + typed warn cells)
@@ -50,7 +53,9 @@ Watcher, every 5 min, per area (located houses + typed warn cells)
   ├─ kind new / level raised   -> publishSceneEvent('warning_issued'), memory in /data
   ├─ kind gone (DWD confirmed) -> publishSceneEvent('warning_ended')
   ├─ pollen level crossed      -> publishSceneEvent('pollen_level_changed')
-  └─ new pollen issue          -> requestWidgetRefresh('pollen')
+  ├─ new pollen issue          -> requestWidgetRefresh('pollen')
+  ├─ air quality level crossed -> publishSceneEvent('air_quality_level_changed')
+  └─ new UBA hour              -> requestWidgetRefresh('air_quality')
   every minute, no network: a warning starting or ending moves the widget
 ```
 
@@ -70,6 +75,8 @@ cache entry serves every user.
 | `opendata.dwd.de/climate_environment/health/alerts/uvi.json`                     | UV index      | 38 cities (placed by `src/sources/dwdUv.js`), daily maximum, 3 days.                            |
 | `maps.dwd.de/geoserver/dwd/wms` (`dwd:Niederschlagsradar`, `dwd:Laender`)        | radar         | One GetMap in EPSG:3857, the house marker drawn with `pngjs`.                                   |
 | `dwd.de/.../mosmix_stationskatalog.cfg`                                          | station table | Fixed width, coordinates in degrees and minutes; `npm run update-stations` regenerates `data/`. |
+| `luftdaten.umweltbundesamt.de/api/air-data/v3/meta/json?use=airquality`          | air stations  | The stations with an index in the period, with coordinates and setting; read once a day.        |
+| `luftdaten.umweltbundesamt.de/api/air-data/v3/airquality/json?station=…`         | air quality   | Hourly index 0 to 4 and per-pollutant index; times in CET all year (no summer time).            |
 
 MOSMIX gives every time in UTC and no time zone: `src/timezone.js` derives
 the IANA zone from the coordinates (coarse European outlines) and Node's ICU

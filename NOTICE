@@ -8,8 +8,15 @@ the pollen and UV indices and the radar composite are published unchanged
 or converted in units; the warning titles are translated by this
 integration.
 
+Air quality: Umweltbundesamt (UBA), air data of the measuring networks of
+the Länder and of the UBA, Datenlizenz Deutschland – Namensnennung – Version
+2.0 (https://www.govdata.de/dl-de/by-2-0). Attribution: "Quelle:
+Umweltbundesamt, Luftdaten der Messnetze der Länder und des UBA". The index
+and the concentrations are published unchanged; the advice of the levels is
+the Umweltbundesamt's, shortened and translated.
+
 Country borders of the radar image: GeoBasis-DE / BKG (Bundesamt für
 Kartographie und Geodäsie), served by the DWD GeoServer.
 
 This integration is not affiliated with nor endorsed by the Deutscher
-Wetterdienst. It never uses the DWD logo.
+Wetterdienst nor by the Umweltbundesamt. It never uses their logos.

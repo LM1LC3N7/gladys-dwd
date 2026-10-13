@@ -9,7 +9,7 @@
   },
   "version": "1.1.0",
   "docker_image": "ghcr.io/lm1lc3n7/gladys-dwd:1.1.0",
-  "gladys_version": ">=5.1.0",
+  "gladys_version": ">=5.2.0",
   "cover_image": "https://raw.githubusercontent.com/LM1LC3N7/gladys-dwd/main/cover.png",
   "categories": ["environment"],
   "transports": ["cloud"],
@@ -24,9 +24,9 @@
         "de": "Wetter vom Deutschen Wetterdienst"
       },
       "description": {
-        "en": "The forecasts of the German national weather service (DWD) for the location of your house in Gladys: nothing to enter, no account, no key. Forecasts and observations for the whole of Europe (MOSMIX, about 4,300 stations); the official warnings, the pollen and UV indices and the radar for Germany. Open data of the DWD (GeoNutzungsverordnung); this is an unofficial connector, not affiliated with the DWD.",
-        "fr": "Les prévisions du service météorologique national allemand (DWD) pour la position de votre maison dans Gladys : rien à saisir, ni compte ni clé. Prévisions et observations pour toute l’Europe (MOSMIX, environ 4 300 stations) ; avertissements officiels, indices pollinique et UV et radar pour l’Allemagne. Données ouvertes du DWD (GeoNutzungsverordnung) ; connecteur non officiel, non affilié au DWD.",
-        "de": "Die Vorhersagen des Deutschen Wetterdienstes (DWD) für den Standort deines Zuhauses in Gladys: nichts einzugeben, kein Konto, kein Schlüssel. Vorhersagen und Beobachtungen für ganz Europa (MOSMIX, etwa 4.300 Stationen); amtliche Warnungen, Pollen- und UV-Index und Regenradar für Deutschland. Open Data des DWD (GeoNutzungsverordnung); inoffizielle Anbindung, nicht mit dem DWD verbunden."
+        "en": "The forecasts of the German national weather service (DWD) for the location of your house in Gladys: nothing to enter, no account, no key. Forecasts and observations for the whole of Europe (MOSMIX, about 4,300 stations); the official warnings, the pollen and UV indices, the radar and, from the Umweltbundesamt, the air quality index for Germany. Open data of the DWD (GeoNutzungsverordnung); this is an unofficial connector, not affiliated with the DWD.",
+        "fr": "Les prévisions du service météorologique national allemand (DWD) pour la position de votre maison dans Gladys : rien à saisir, ni compte ni clé. Prévisions et observations pour toute l’Europe (MOSMIX, environ 4 300 stations) ; avertissements officiels, indices pollinique et UV, radar et, de l’Umweltbundesamt, indice de qualité de l’air pour l’Allemagne. Données ouvertes du DWD (GeoNutzungsverordnung) ; connecteur non officiel, non affilié au DWD.",
+        "de": "Die Vorhersagen des Deutschen Wetterdienstes (DWD) für den Standort deines Zuhauses in Gladys: nichts einzugeben, kein Konto, kein Schlüssel. Vorhersagen und Beobachtungen für ganz Europa (MOSMIX, etwa 4.300 Stationen); amtliche Warnungen, Pollen- und UV-Index, Regenradar und, vom Umweltbundesamt, der Luftqualitätsindex für Deutschland. Open Data des DWD (GeoNutzungsverordnung); inoffizielle Anbindung, nicht mit dem DWD verbunden."
       },
       "links": [
         {
@@ -43,6 +43,14 @@
             "en": "DWD open data",
             "fr": "Données ouvertes du DWD",
             "de": "DWD Open Data"
+          }
+        },
+        {
+          "url": "https://www.umweltbundesamt.de/daten/luft/luftdaten",
+          "label": {
+            "en": "Umweltbundesamt air data",
+            "fr": "Données sur l’air de l’Umweltbundesamt",
+            "de": "Luftdaten des Umweltbundesamtes"
           }
         }
       ]
@@ -98,6 +106,21 @@
       "default": false
     },
     {
+      "key": "air_quality_alerts",
+      "type": "boolean",
+      "label": {
+        "en": "Air quality alerts",
+        "fr": "Alertes qualité de l’air",
+        "de": "Luftqualitätswarnungen"
+      },
+      "description": {
+        "en": "Adds an alert when the air quality index of the Umweltbundesamt at the nearest station reaches “poor”. Not an official warning: it comes from the index itself. Germany only.",
+        "fr": "Ajoute une alerte quand l’indice de qualité de l’air de l’Umweltbundesamt à la station la plus proche atteint « mauvaise ». Ce n’est pas un avertissement officiel : elle découle de l’indice. Allemagne seulement.",
+        "de": "Fügt eine Warnung hinzu, wenn der Luftqualitätsindex des Umweltbundesamtes an der nächsten Messstation „schlecht“ erreicht. Keine amtliche Warnung: sie folgt aus dem Index selbst. Nur Deutschland."
+      },
+      "default": false
+    },
+    {
       "key": "radar_image",
       "type": "boolean",
       "label": {
@@ -129,6 +152,26 @@
         "en": "e.g. 10384",
         "fr": "ex. 10384",
         "de": "z. B. 10384"
+      },
+      "default": ""
+    },
+    {
+      "key": "air_quality_station",
+      "type": "string",
+      "label": {
+        "en": "Air quality station (advanced)",
+        "fr": "Station de qualité de l’air (avancé)",
+        "de": "Luftmessstation (erweitert)"
+      },
+      "description": {
+        "en": "Empty: the nearest Umweltbundesamt measuring station (50 km at most) is used. To force another one, its code (e.g. DEBE068 for Berlin Mitte), from luftdaten.umweltbundesamt.de.",
+        "fr": "Vide : la station de mesure de l’Umweltbundesamt la plus proche (50 km au plus) est utilisée. Pour en forcer une autre, son code (ex. DEBE068 pour Berlin Mitte), sur luftdaten.umweltbundesamt.de.",
+        "de": "Leer: die nächste Messstation des Umweltbundesamtes (höchstens 50 km) wird genutzt. Für eine andere ihr Code (z. B. DEBE068 für Berlin Mitte), siehe luftdaten.umweltbundesamt.de."
+      },
+      "placeholder": {
+        "en": "e.g. DEBE068",
+        "fr": "ex. DEBE068",
+        "de": "z. B. DEBE068"
       },
       "default": ""
     }
@@ -271,21 +314,17 @@
         },
         {
           "key": "house",
-          "type": "string",
+          "type": "select",
+          "source": "houses",
           "label": {
             "en": "House",
             "fr": "Maison",
             "de": "Zuhause"
           },
           "description": {
-            "en": "Exact name of the house in Gladys. Empty: every house.",
-            "fr": "Nom exact de la maison dans Gladys. Vide : toutes les maisons.",
-            "de": "Genauer Name des Zuhauses in Gladys. Leer: jedes Zuhause."
-          },
-          "placeholder": {
-            "en": "e.g. Home",
-            "fr": "ex. Maison",
-            "de": "z. B. Zuhause"
+            "en": "Empty: every house.",
+            "fr": "Vide : toutes les maisons.",
+            "de": "Leer: jedes Zuhause."
           }
         }
       ],
@@ -351,6 +390,202 @@
             "en": "Pollen region",
             "fr": "Région pollinique",
             "de": "Pollenregion"
+          }
+        },
+        {
+          "key": "house",
+          "type": "string",
+          "label": {
+            "en": "House",
+            "fr": "Maison",
+            "de": "Zuhause"
+          }
+        },
+        {
+          "key": "summary",
+          "type": "string",
+          "label": {
+            "en": "Summary",
+            "fr": "Résumé",
+            "de": "Zusammenfassung"
+          }
+        }
+      ]
+    },
+    {
+      "key": "air_quality_level_changed",
+      "label": {
+        "en": "Air quality level changed",
+        "fr": "Niveau de qualité de l’air changé",
+        "de": "Luftqualitätsstufe geändert"
+      },
+      "description": {
+        "en": "The air quality index of the Umweltbundesamt at the station nearest to a house reached a new level.",
+        "fr": "L’indice de qualité de l’air de l’Umweltbundesamt à la station la plus proche d’une maison a atteint un nouveau niveau.",
+        "de": "Der Luftqualitätsindex des Umweltbundesamtes an der nächsten Station eines Zuhauses hat eine neue Stufe erreicht."
+      },
+      "fields": [
+        {
+          "key": "level",
+          "type": "select",
+          "label": {
+            "en": "Level reached",
+            "fr": "Niveau atteint",
+            "de": "Erreichte Stufe"
+          },
+          "description": {
+            "en": "Empty: any level. Fires even when the index jumps over this level.",
+            "fr": "Vide : tous les niveaux. Se déclenche même si l’indice saute ce niveau.",
+            "de": "Leer: jede Stufe. Löst auch aus, wenn der Index diese Stufe überspringt."
+          },
+          "options": [
+            {
+              "value": "very_good",
+              "label": {
+                "en": "Very good (0)",
+                "fr": "Très bonne (0)",
+                "de": "Sehr gut (0)"
+              }
+            },
+            {
+              "value": "good",
+              "label": {
+                "en": "Good (1)",
+                "fr": "Bonne (1)",
+                "de": "Gut (1)"
+              }
+            },
+            {
+              "value": "moderate",
+              "label": {
+                "en": "Moderate (2)",
+                "fr": "Moyenne (2)",
+                "de": "Mäßig (2)"
+              }
+            },
+            {
+              "value": "poor",
+              "label": {
+                "en": "Poor (3)",
+                "fr": "Mauvaise (3)",
+                "de": "Schlecht (3)"
+              }
+            },
+            {
+              "value": "very_poor",
+              "label": {
+                "en": "Very poor (4)",
+                "fr": "Très mauvaise (4)",
+                "de": "Sehr schlecht (4)"
+              }
+            }
+          ]
+        },
+        {
+          "key": "direction",
+          "type": "select",
+          "label": {
+            "en": "Direction",
+            "fr": "Sens",
+            "de": "Richtung"
+          },
+          "options": [
+            {
+              "value": "worsening",
+              "label": {
+                "en": "Getting worse",
+                "fr": "Aggravation",
+                "de": "Verschlechterung"
+              }
+            },
+            {
+              "value": "improving",
+              "label": {
+                "en": "Getting better",
+                "fr": "Amélioration",
+                "de": "Besserung"
+              }
+            }
+          ]
+        },
+        {
+          "key": "house",
+          "type": "select",
+          "source": "houses",
+          "label": {
+            "en": "House",
+            "fr": "Maison",
+            "de": "Zuhause"
+          },
+          "description": {
+            "en": "Empty: every house.",
+            "fr": "Vide : toutes les maisons.",
+            "de": "Leer: jedes Zuhause."
+          }
+        }
+      ],
+      "variables": [
+        {
+          "key": "level",
+          "type": "string",
+          "label": {
+            "en": "Level reached",
+            "fr": "Niveau atteint",
+            "de": "Erreichte Stufe"
+          }
+        },
+        {
+          "key": "direction",
+          "type": "string",
+          "label": {
+            "en": "Direction",
+            "fr": "Sens",
+            "de": "Richtung"
+          }
+        },
+        {
+          "key": "previous_level",
+          "type": "string",
+          "label": {
+            "en": "Previous level",
+            "fr": "Niveau précédent",
+            "de": "Vorherige Stufe"
+          }
+        },
+        {
+          "key": "current_level",
+          "type": "string",
+          "label": {
+            "en": "Current level",
+            "fr": "Niveau actuel",
+            "de": "Aktuelle Stufe"
+          }
+        },
+        {
+          "key": "index",
+          "type": "number",
+          "label": {
+            "en": "Index (0 to 4)",
+            "fr": "Indice (0 à 4)",
+            "de": "Index (0 bis 4)"
+          }
+        },
+        {
+          "key": "pollutant",
+          "type": "string",
+          "label": {
+            "en": "Main pollutant",
+            "fr": "Polluant principal",
+            "de": "Hauptschadstoff"
+          }
+        },
+        {
+          "key": "station",
+          "type": "string",
+          "label": {
+            "en": "Measuring station",
+            "fr": "Station de mesure",
+            "de": "Messstation"
           }
         },
         {
@@ -944,21 +1179,36 @@
       "settings": [
         {
           "key": "house",
-          "type": "string",
+          "type": "select",
+          "source": "houses",
           "label": {
-            "en": "House or warn cell",
-            "fr": "Maison ou cellule d’alerte",
-            "de": "Zuhause oder Warnzelle"
+            "en": "House",
+            "fr": "Maison",
+            "de": "Zuhause"
           },
           "description": {
-            "en": "Name of the house in Gladys, or a warn cell id of the configuration. Empty: the first area.",
-            "fr": "Nom de la maison dans Gladys, ou identifiant d’une cellule d’alerte de la configuration. Vide : la première zone.",
-            "de": "Name des Zuhauses in Gladys oder eine Warnzellen-ID aus der Konfiguration. Leer: das erste Gebiet."
+            "en": "The house whose warnings are shown. Empty: the first area followed.",
+            "fr": "La maison dont les avertissements sont affichés. Vide : la première zone suivie.",
+            "de": "Das Zuhause, dessen Warnungen gezeigt werden. Leer: das erste beobachtete Gebiet."
+          }
+        },
+        {
+          "key": "cell",
+          "type": "string",
+          "label": {
+            "en": "Warn cell instead",
+            "fr": "Cellule d’alerte à la place",
+            "de": "Stattdessen eine Warnzelle"
+          },
+          "description": {
+            "en": "A warn cell id of the configuration, to show its warnings instead of a house’s.",
+            "fr": "Un identifiant de cellule d’alerte de la configuration, pour afficher ses avertissements plutôt que ceux d’une maison.",
+            "de": "Eine Warnzellen-ID aus der Konfiguration, um deren Warnungen statt der eines Zuhauses zu zeigen."
           },
           "placeholder": {
-            "en": "e.g. Home",
-            "fr": "ex. Maison",
-            "de": "z. B. Zuhause"
+            "en": "e.g. 809180117",
+            "fr": "ex. 809180117",
+            "de": "z. B. 809180117"
           }
         }
       ]
@@ -979,21 +1229,48 @@
       "settings": [
         {
           "key": "house",
-          "type": "string",
+          "type": "select",
+          "source": "houses",
           "label": {
             "en": "House",
             "fr": "Maison",
             "de": "Zuhause"
           },
           "description": {
-            "en": "Name of the house in Gladys. Empty: the first located house.",
-            "fr": "Nom de la maison dans Gladys. Vide : la première maison localisée.",
-            "de": "Name des Zuhauses in Gladys. Leer: das erste Zuhause mit Standort."
+            "en": "Empty: the first located house.",
+            "fr": "Vide : la première maison localisée.",
+            "de": "Leer: das erste Zuhause mit Standort."
+          }
+        }
+      ]
+    },
+    {
+      "key": "air_quality",
+      "label": {
+        "en": "Air quality",
+        "fr": "Qualité de l’air",
+        "de": "Luftqualität"
+      },
+      "description": {
+        "en": "Umweltbundesamt index of the hour at the nearest station, pollutant by pollutant, advice.",
+        "fr": "Indice de l’Umweltbundesamt de l’heure à la station la plus proche, par polluant, conseils.",
+        "de": "Index des Umweltbundesamtes der Stunde an der nächsten Station, je Schadstoff, Hinweise."
+      },
+      "icon": "wind",
+      "settings": [
+        {
+          "key": "house",
+          "type": "select",
+          "source": "houses",
+          "label": {
+            "en": "House",
+            "fr": "Maison",
+            "de": "Zuhause"
           },
-          "placeholder": {
-            "en": "e.g. Home",
-            "fr": "ex. Maison",
-            "de": "z. B. Zuhause"
+          "description": {
+            "en": "Empty: the first located house.",
+            "fr": "Vide : la première maison localisée.",
+            "de": "Leer: das erste Zuhause mit Standort."
           }
         }
       ]

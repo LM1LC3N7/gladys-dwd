@@ -14,6 +14,7 @@ import { createSceneActions } from '../src/scenes.js';
 import { LANGUAGES } from '../src/i18n.js';
 import { DEFAULT_CONFIG } from '../src/config.js';
 import { POLLEN_LEVEL_KEYS } from '../src/pollen.js';
+import { AIR_QUALITY_LEVEL_KEYS } from '../src/airQuality.js';
 
 const manifest = JSON.parse(
   await readFile(new URL('../gladys-assistant-integration.json', import.meta.url), 'utf8'),
@@ -42,6 +43,7 @@ const SCENE_ACTIONS = createSceneActions({});
 const CAPABILITY_FIELDS = ['scene_triggers', 'scene_actions', 'widgets'];
 const CAPABILITY_MIN_GLADYS_VERSION = [5, 1, 0];
 const CATEGORIES_MIN_GLADYS_VERSION = [4, 86, 0];
+const HOUSES_SOURCE_MIN_GLADYS_VERSION = [5, 2, 0];
 
 const keysOf = (list) => (list ?? []).map((entry) => entry.key);
 
@@ -181,12 +183,30 @@ test('section fields are purely presentational', () => {
   }
 });
 
-test('no dynamic source: the store schema only knows "devices", and we have none', () => {
-  // `source: "houses"` exists in the core but the store validator refuses
-  // it: the house is a free text (its name) instead.
+test('the house fields are picked from the houses of Gladys (source "houses", 5.2+)', () => {
+  // The user picks the house in a list instead of typing its name; a
+  // sourced select carries no options and no default (code-enforced by
+  // the store), and older cores reject the source.
+  const sourced = allFields.filter((f) => f.source !== undefined);
+  assert.ok(sourced.length > 0, 'the house fields use the houses source');
+  for (const field of sourced) {
+    assert.equal(field.source, 'houses', `field "${field.key}": unknown source`);
+    assert.equal(field.type, 'select', `field "${field.key}": a sourced field is a select`);
+    assert.equal(field.options, undefined, `field "${field.key}": no options with a source`);
+    assert.equal(field.default, undefined, `field "${field.key}": no default with a source`);
+  }
+  assert.ok(
+    isAtLeast(minGladysVersion(), HOUSES_SOURCE_MIN_GLADYS_VERSION),
+    `source "houses" requires gladys_version >= 5.2.0, got "${manifest.gladys_version}"`,
+  );
+});
+
+test('the air quality trigger offers exactly the UBA levels', () => {
+  const trigger = manifest.scene_triggers.find((t) => t.key === 'air_quality_level_changed');
+  const level = trigger.fields.find((f) => f.key === 'level');
   assert.deepEqual(
-    allFields.filter((f) => f.source !== undefined),
-    [],
+    level.options.map((o) => o.value),
+    AIR_QUALITY_LEVEL_KEYS,
   );
 });
 
@@ -209,7 +229,9 @@ test('the warning triggers offer exactly the kinds and levels the code fires', a
 });
 
 test('select options are strings and defaults are among them', () => {
-  for (const field of allFields.filter((f) => f.type === 'select' || f.type === 'multi_select')) {
+  for (const field of allFields.filter(
+    (f) => (f.type === 'select' || f.type === 'multi_select') && f.source === undefined,
+  )) {
     for (const option of field.options) {
       assert.equal(typeof option.value, 'string');
       assert.ok(option.label.en && option.label.fr, `${field.key}.${option.value} label`);

@@ -18,6 +18,8 @@ export const USER_AGENT = `gladys-dwd/${VERSION} (+https://github.com/LM1LC3N7/g
 export const DWD_OPENDATA_URL = 'https://opendata.dwd.de';
 // GeoServer (warnings as WFS features, radar as WMS images).
 export const DWD_GEOSERVER_URL = 'https://maps.dwd.de/geoserver/dwd';
+// Umweltbundesamt air data (the German air quality index).
+export const UBA_API_URL = 'https://luftdaten.umweltbundesamt.de/api/air-data/v3';
 
 // Gladys awaits onWeatherGet under 15 s: the forecast file and the
 // observations of a location are read in parallel, each under this limit.
@@ -35,6 +37,11 @@ export const ALERTS_STALE_MAX_AGE = 60 * 60 * 1000;
 export const POLLEN_TTL = 60 * 60 * 1000;
 export const POLLEN_STALE_MAX_AGE = 36 * 60 * 60 * 1000;
 export const UV_TTL = 60 * 60 * 1000;
+// The UBA index is hourly, published one to two hours later.
+export const AIR_QUALITY_TTL = 15 * 60 * 1000;
+export const AIR_QUALITY_STALE_MAX_AGE = 3 * 60 * 60 * 1000;
+// The list of measuring stations moves rarely: read once a day.
+export const AIR_STATIONS_TTL = 24 * 60 * 60 * 1000;
 // The pollen region of a location never moves.
 export const REGION_LOOKUP_TTL = 24 * 60 * 60 * 1000;
 // The radar composite is updated every 5 minutes.
@@ -69,7 +76,9 @@ export const MAX_ALERT_DESCRIPTION_LENGTH = 5000;
 export const RADAR_IMAGE_KEY = 'radar';
 export const WARNINGS_WIDGET = 'warnings';
 export const POLLEN_WIDGET = 'pollen';
+export const AIR_QUALITY_WIDGET = 'air_quality';
 export const POLLEN_TRIGGER = 'pollen_level_changed';
+export const AIR_QUALITY_TRIGGER = 'air_quality_level_changed';
 export const WARNING_ISSUED_TRIGGER = 'warning_issued';
 export const WARNING_ENDED_TRIGGER = 'warning_ended';
 export const GET_WARNINGS_ACTION = 'get_warnings';

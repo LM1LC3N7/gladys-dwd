@@ -8,6 +8,8 @@
 //   getAlerts      the official DWD warnings at the house, cached 5 minutes.
 //   getPollen      the pollen forecast of the region, cached 1 hour.
 //   getUv          the UV index forecast of the nearest city, cached 1 hour.
+//   getAirQuality  the UBA air quality index of the nearest station, cached
+//                  15 minutes (the stations once a day).
 //   getWeather     the onWeatherGet answer, in the pivot format.
 //   getImage       the onWeatherGetImage answer (radar).
 //
@@ -17,6 +19,9 @@
 
 import { createLogger } from '@gladysassistant/integration-sdk';
 import {
+  AIR_QUALITY_STALE_MAX_AGE,
+  AIR_QUALITY_TTL,
+  AIR_STATIONS_TTL,
   ALERTS_STALE_MAX_AGE,
   ALERTS_TTL,
   HTTP_TIMEOUT,
@@ -40,13 +45,18 @@ import { num } from './units.js';
 import { findStation, nearestStation } from './stations.js';
 import { utcOffsetMinutes } from './timezone.js';
 import { sunElevation } from './sun.js';
-import { pollenAlerts } from './assessment.js';
+import { airQualityAlerts, pollenAlerts } from './assessment.js';
 import { fetchMosmix, parseMosmix } from './sources/dwdMosmix.js';
 import { currentObservation, fetchObservations } from './sources/dwdObservations.js';
 import { fetchCellWarnings, fetchWarnings } from './sources/dwdWarnings.js';
 import { fetchPollen, fetchPollenRegion } from './sources/dwdPollen.js';
 import { fetchUv, nearestUvCity } from './sources/dwdUv.js';
 import { buildRadarImage } from './sources/dwdRadar.js';
+import {
+  fetchAirQuality,
+  fetchStations,
+  nearestStation as nearestAirStation,
+} from './sources/ubaAirQuality.js';
 
 const defaultLogger = createLogger({ name: 'provider' });
 
@@ -106,6 +116,8 @@ export class WeatherProvider {
     this.pollen = new BoundedMap();
     this.regions = new BoundedMap();
     this.uv = new BoundedMap();
+    this.airQuality = new BoundedMap();
+    this.airStations = undefined;
     this.inflight = new Map();
     this.radar = undefined;
     this.lastLocation = undefined;
@@ -117,6 +129,7 @@ export class WeatherProvider {
     this.alerts.clear();
     this.pollen.clear();
     this.uv.clear();
+    this.airQuality.clear();
     this.radar = undefined;
   }
 
@@ -336,6 +349,69 @@ export class WeatherProvider {
     });
   }
 
+  /** The UBA measuring stations with an index, read once a day. */
+  async getAirStations() {
+    if (this.airStations && this.now() - this.airStations.fetchedAt < AIR_STATIONS_TTL) {
+      return this.airStations.stations;
+    }
+    return this.share('air:stations', async () => {
+      try {
+        const stations = await fetchStations({ timeout: HTTP_TIMEOUT, now: this.now() });
+        this.airStations = { stations, fetchedAt: this.now() };
+        return stations;
+      } catch (err) {
+        if (this.airStations) {
+          return this.airStations.stations;
+        }
+        throw err;
+      }
+    });
+  }
+
+  /** The UBA station of a location: the nearest, or the forced one. */
+  async findAirStation(latitude, longitude) {
+    const stations = await this.getAirStations();
+    return nearestAirStation(stations, latitude, longitude, {
+      code: this.getConfig().air_quality_station,
+    });
+  }
+
+  /**
+   * The air quality at a location: undefined outside Germany, far from any
+   * station, or when the UBA does not answer and nothing recent is known.
+   */
+  async getAirQuality(latitude, longitude, { force = false } = {}) {
+    if (!isInGermanyArea(latitude, longitude)) {
+      return undefined;
+    }
+    const key = locationKey(latitude, longitude);
+    const cached = this.airQuality.get(key);
+    if (!force && cached && this.now() - cached.fetchedAt < AIR_QUALITY_TTL) {
+      return cached.airQuality;
+    }
+    return this.share(`air:${key}`, async () => {
+      try {
+        const station = await this.findAirStation(latitude, longitude);
+        const airQuality = station
+          ? await fetchAirQuality(station, { timeout: HTTP_TIMEOUT, now: this.now() })
+          : undefined;
+        this.airQuality.set(key, { airQuality, fetchedAt: this.now() });
+        return airQuality;
+      } catch (err) {
+        this.logger.warn(`UBA air quality failed: ${err.message}`);
+        if (cached && this.now() - cached.fetchedAt < AIR_QUALITY_STALE_MAX_AGE) {
+          return cached.airQuality;
+        }
+        return undefined;
+      }
+    });
+  }
+
+  /** The cached air quality of a location, without fetching. */
+  cachedAirQuality(latitude, longitude) {
+    return this.airQuality.get(locationKey(latitude, longitude))?.airQuality;
+  }
+
   /** The snapshot with the UV index of the city laid over its hours and days. */
   withUv(snapshot, uv, latitude, longitude) {
     if (!uv) {
@@ -362,11 +438,12 @@ export class WeatherProvider {
     return { ...snapshot, current, hours, days };
   }
 
-  /** Official alerts plus, when enabled, the pollen one. */
-  combineAlerts(official, pollen) {
+  /** Official alerts plus, when enabled, the pollen and air quality ones. */
+  combineAlerts(official, pollen, airQuality) {
     const config = this.getConfig();
     const synthetic = config.pollen_alerts ? pollenAlerts(pollen, this.now()) : [];
-    return [...official, ...synthetic];
+    const air = config.air_quality_alerts ? airQualityAlerts(airQuality) : [];
+    return [...official, ...synthetic, ...air];
   }
 
   images(latitude, longitude) {
@@ -384,18 +461,19 @@ export class WeatherProvider {
       throw new Error('The house has no valid coordinates');
     }
     this.lastLocation = { latitude: lat, longitude: lon };
-    const [snapshot, official, pollen, uv] = await Promise.all([
+    const [snapshot, official, pollen, uv, airQuality] = await Promise.all([
       this.getSnapshot(lat, lon),
       this.getAlerts(lat, lon),
       this.getConfig().pollen_alerts ? this.getPollen(lat, lon) : undefined,
       this.getUv(lat, lon),
+      this.getConfig().air_quality_alerts ? this.getAirQuality(lat, lon) : undefined,
     ]);
     return toPivot(this.withUv(snapshot, uv, lat, lon), {
       latitude: lat,
       longitude: lon,
       units,
       language,
-      alerts: this.combineAlerts(official, pollen),
+      alerts: this.combineAlerts(official, pollen, airQuality),
       images: this.images(lat, lon),
       now: this.now(),
     });

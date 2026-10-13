@@ -52,7 +52,8 @@ export function installFetch(routes) {
 
 // Routes answering Berlin from the recorded fixtures: the MOSMIX file of
 // Berlin-Tempelhof for ANY station, the observations of the same station,
-// the warnings, the pollen region and index, the UV index.
+// the warnings, the pollen region and index, the UV index, the UBA stations
+// around Berlin and the index of Berlin Mitte (DEBE068).
 export function berlinRoutes(overrides = {}) {
   return [
     ...(overrides.routes ?? []),
@@ -69,10 +70,16 @@ export function berlinRoutes(overrides = {}) {
     [/Pollenfluggebiete/, () => json(fixture('pollen-region-berlin.json'))],
     [/s31fg\.json/, () => json(fixture('pollen-s31fg.json'))],
     [/uvi\.json/, () => json(fixture('uvi.json'))],
+    [/air-data\/v3\/meta\/json/, () => json(fixture('uba-meta-berlin.json'))],
+    [
+      /air-data\/v3\/airquality\/json/,
+      () => json(overrides.airQuality ?? fixture('uba-airquality-DEBE068.json')),
+    ],
   ];
 }
 
 // The MOSMIX file was issued on 2026-10-12 at 21:00 UTC, the observations
-// run to 2026-10-13 01:00 UTC, the pollen and UV files are of 2026-10-12.
+// run to 2026-10-13 01:00 UTC, the pollen and UV files are of 2026-10-12,
+// the UBA index of Berlin Mitte runs from 2026-10-12 to 2026-10-13 15:00 CET.
 export const FIXTURE_NOW = Date.parse('2026-10-13T02:30:00Z');
 export const BERLIN = { latitude: 52.52, longitude: 13.4 };

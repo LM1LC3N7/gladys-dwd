@@ -13,6 +13,8 @@
 //     core re-pulls through onWeatherGet, served from the fresh cache);
 //     "warning issued" / "warning ended" scene events (src/sceneTriggers.js);
 //   - pollen level (houses): a scene event on every crossed level;
+//   - air quality (houses in Germany): the UBA index, a scene event on
+//     every crossed level;
 //   - new data -> requestWidgetRefresh() for the widgets.
 // Every minute, without network, the cached warnings are re-read: a warning
 // announced for 14:00 is "now" at 14:00 in the widget.
@@ -25,6 +27,7 @@
 
 import { createLogger } from '@gladysassistant/integration-sdk';
 import {
+  AIR_QUALITY_WIDGET,
   CLOCK_INTERVAL,
   HOUSES_REFRESH_INTERVAL,
   POLLEN_WIDGET,
@@ -35,7 +38,7 @@ import { configCellIds } from './config.js';
 import { isInGermanyArea, isValidLocation, locationKey } from './geo.js';
 import { localDate } from './pivot.js';
 import { timeZoneOf, utcOffsetMinutes } from './timezone.js';
-import { PollenTracker, WarningTracker } from './sceneTriggers.js';
+import { AirQualityTracker, PollenTracker, WarningTracker } from './sceneTriggers.js';
 import { fetchCellById, inForce } from './sources/dwdWarnings.js';
 import { HTTP_TIMEOUT } from './constants.js';
 
@@ -60,6 +63,11 @@ export function pollenSignature(pollen) {
   return pollen ? `${pollen.region.id}|${pollen.issued}` : 'none';
 }
 
+/** A signature of the air quality: changes with a new hour or station. */
+export function airQualitySignature(airQuality) {
+  return airQuality ? `${airQuality.station.code}|${airQuality.current.datetime}` : 'none';
+}
+
 export class Watcher {
   /**
    * @param {{ gladys: object, provider: import('./provider.js').WeatherProvider,
@@ -75,6 +83,7 @@ export class Watcher {
     this.logger = logger ?? defaultLogger;
     this.now = now ?? Date.now;
     this.pollenTracker = new PollenTracker();
+    this.airQualityTracker = new AirQualityTracker();
     this.warningTracker = new WarningTracker({ store, now: this.now });
     this.houses = [];
     this.housesReadAt = 0;
@@ -83,6 +92,7 @@ export class Watcher {
     this.signatures = new Map();
     this.widgetSignatures = new Map();
     this.pollenSignatures = new Map();
+    this.airSignatures = new Map();
     this.timer = undefined;
     this.clock = undefined;
     this.running = false;
@@ -259,9 +269,11 @@ export class Watcher {
       let alertsChanged = false;
       let widgetChanged = false;
       let pollenChanged = false;
+      let airChanged = false;
       for (const house of this.locations()) {
         const result = await this.watchHouse(house);
         pollenChanged ||= result.pollenChanged;
+        airChanged ||= result.airChanged;
       }
       const areas = this.warningAreas();
       for (const area of areas) {
@@ -279,6 +291,9 @@ export class Watcher {
       }
       if (pollenChanged) {
         this.gladys.requestWidgetRefresh(POLLEN_WIDGET);
+      }
+      if (airChanged) {
+        this.gladys.requestWidgetRefresh(AIR_QUALITY_WIDGET);
       }
     } catch (err) {
       this.logger.error('Watch cycle failed', err);
@@ -322,12 +337,19 @@ export class Watcher {
     for (const event of this.pollenTracker.evaluate(house, pollen, today, this.getPreferences())) {
       await this.publish(event);
     }
+    const airQuality = await this.provider.getAirQuality(latitude, longitude);
+    const airSignature = airQualitySignature(airQuality);
+    const airChanged = airSignature !== this.airSignatures.get(key);
+    this.airSignatures.set(key, airSignature);
+    for (const event of this.airQualityTracker.evaluate(house, airQuality, this.getPreferences())) {
+      await this.publish(event);
+    }
     try {
       await this.provider.getSnapshot(latitude, longitude);
     } catch (err) {
       this.logger.warn(`No weather for ${house.name || key}: ${err.message}`);
     }
-    return { pollenChanged };
+    return { pollenChanged, airChanged };
   }
 
   async watchWarnings(area) {
@@ -335,7 +357,10 @@ export class Watcher {
     const alerts = await this.provider.getAlertsFor(area, { force: true });
     const fetchedAt = alerts.fetchedAt ?? 0;
     const pollen = area.cellId ? undefined : this.provider.pollen.get(key)?.pollen;
-    const signature = alertsSignature(this.provider.combineAlerts(alerts, pollen));
+    const airQuality = area.cellId
+      ? undefined
+      : this.provider.cachedAirQuality(area.latitude, area.longitude);
+    const signature = alertsSignature(this.provider.combineAlerts(alerts, pollen, airQuality));
     const previous = this.signatures.get(key);
     this.signatures.set(key, signature);
     const shown = widgetSignature(alerts, this.now());
