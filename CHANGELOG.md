@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-10-13
+
 ### Added
 
 - DWD weather provider: the MOSMIX point forecasts of the nearest station
@@ -26,3 +28,6 @@ the notes of the version's GitHub Release.
   provider image.
 - "Test the DWD sources" button in the configuration screen; optional
   forecast station override.
+
+[Unreleased]: https://github.com/LM1LC3N7/gladys-dwd/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/LM1LC3N7/gladys-dwd/releases/tag/v1.0.0

@@ -1,6 +1,6 @@
 {
   "name": "gladys-dwd",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Deutscher Wetterdienst (DWD) weather provider for Gladys Assistant: MOSMIX forecasts, hourly observations, official warnings, pollen and UV index, radar.",
   "type": "module",
