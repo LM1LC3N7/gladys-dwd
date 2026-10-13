@@ -70,3 +70,9 @@ export const RADAR_IMAGE_KEY = 'radar';
 export const WARNINGS_WIDGET = 'warnings';
 export const POLLEN_WIDGET = 'pollen';
 export const POLLEN_TRIGGER = 'pollen_level_changed';
+export const WARNING_ISSUED_TRIGGER = 'warning_issued';
+export const WARNING_ENDED_TRIGGER = 'warning_ended';
+export const GET_WARNINGS_ACTION = 'get_warnings';
+// The widget tiles "now" and "later" move when a warning starts: re-read the
+// cached warnings every minute, without network.
+export const CLOCK_INTERVAL = 60 * 1000;

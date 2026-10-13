@@ -45,10 +45,13 @@ onWeatherGet(lat, lon, language, units)
        ├─ getUv (uvi.json of the nearest city, cache 1 h)
        └─ toPivot (metric snapshot -> requested units and language)
 
-Watcher, every 5 min, per located house (getHouses, manifest location: true)
+Watcher, every 5 min, per area (located houses + typed warn cells)
   ├─ warnings changed          -> requestWeatherRefresh(), requestWidgetRefresh('warnings')
+  ├─ kind new / level raised   -> publishSceneEvent('warning_issued'), memory in /data
+  ├─ kind gone (DWD confirmed) -> publishSceneEvent('warning_ended')
   ├─ pollen level crossed      -> publishSceneEvent('pollen_level_changed')
   └─ new pollen issue          -> requestWidgetRefresh('pollen')
+  every minute, no network: a warning starting or ending moves the widget
 ```
 
 Internally every value is kept in the pivot metric units (°C, m/s, hPa, mm,

@@ -1,0 +1,17 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "Warngebiete_Gemeinden.711000101",
+      "geometry": null,
+      "properties": { "WARNCELLID": 711000101, "NAME": "Berl. - Mitte", "KREIS": "Berlin" },
+      "bbox": [52.5047, 13.365, 52.5416, 13.4305]
+    }
+  ],
+  "totalFeatures": 1,
+  "numberMatched": 1,
+  "numberReturned": 1,
+  "timeStamp": "2026-10-13T10:15:58.146Z",
+  "crs": null
+}

@@ -12,6 +12,7 @@ export const DEFAULT_CONFIG = {
   pollen_alerts: false,
   radar_image: true,
   station: '',
+  warncell_ids: '',
 };
 
 // A form may send "true"/"false" strings.
@@ -33,12 +34,28 @@ function stationId(value) {
   return /^[A-Z0-9]{3,6}$/.test(id) ? id : '';
 }
 
+// "809180117, 103359000" -> the 9-digit ids, deduplicated, as one string.
+function warncellIds(value) {
+  const ids = String(value ?? '')
+    .split(/[\s,;]+/)
+    .filter((id) => /^\d{9}$/.test(id));
+  return [...new Set(ids)].join(',');
+}
+
 /** Merge the user config with the defaults, coercing the types. */
 export function normalizeConfig(raw = {}) {
   return Object.fromEntries(
-    Object.entries(DEFAULT_CONFIG).map(([key, fallback]) => [
-      key,
-      typeof fallback === 'boolean' ? bool(raw?.[key], fallback) : stationId(raw?.[key]),
-    ]),
+    Object.entries(DEFAULT_CONFIG).map(([key, fallback]) => {
+      if (typeof fallback === 'boolean') {
+        return [key, bool(raw?.[key], fallback)];
+      }
+      return [key, key === 'warncell_ids' ? warncellIds(raw?.[key]) : stationId(raw?.[key])];
+    }),
   );
 }
+
+/** The warn cell ids of a normalized config, as a list. */
+export const configCellIds = (config) =>
+  String(config?.warncell_ids ?? '')
+    .split(',')
+    .filter(Boolean);

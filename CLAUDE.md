@@ -54,11 +54,17 @@ src/conditions.js             WMO ww codes, poi keys, cloud cover -> pivot condi
 src/apparent.js               Steadman apparent temperature, humidity/dew point
 src/pollen.js                 pollen names, levels, crossings (pure)
 src/assessment.js             the optional pollen alert
-src/watcher.js                5-min loop: warnings nudge, pollen events, widget nudges
-src/sceneTriggers.js          pollen level tracker (baseline, crossed levels)
+src/watcher.js                5-min loop over the areas (houses + typed warn cells):
+                              warnings nudge, warning and pollen events, widget nudges;
+                              minute clock for the widget
+src/sceneTriggers.js          pollen level tracker; warning tracker (memory in /data,
+                              compared by kind and level, "ended" confirmed by the DWD)
+src/scenes.js                 "get_warnings" scene action (summary ready to send)
+src/store.js                  JSON files in /data (DWD_DATA_DIR locally), memory store for tests
 src/widgets.js                "warnings" and "pollen" widget contents
-src/actions.js                "test_sources" button
-src/i18n.js                   runtime texts, the DWD event name translator
+src/actions.js                "test_sources" and "find_warncell" buttons
+src/i18n.js                   runtime texts (en/fr/de), level and kind names, local times,
+                              the DWD event name translator
 data/stations.json            Europe subset of the MOSMIX catalog (generated)
 scripts/update-stations.mjs   regenerates data/ from the DWD catalog and poi list
 test/fixtures/                recorded DWD answers (2026-10-13, Berlin)
@@ -88,9 +94,18 @@ happen only in `src/pivot.js` (and in the widget / scene texts).
   (not WMO). Rows of the last hour may lack the temperature: skipped.
 - **WFS** (GeoServer): `CQL_FILTER=INTERSECTS(THE_GEOM,POINT(lat lon))`
   with the LATITUDE FIRST (EPSG:4326 axis order): `POINT(lon lat)` answers
-  nothing, silently. `propertyName` trims the answer. `ALTITUDE`/`CEILING`
-  are feet; `SEVERITY` is CAP (Minor…Extreme); the event name is German
-  capitals, translated word by word in `src/i18n.js`.
+  nothing, silently. The cell layers (`Warngebiete_*`) name their geometry
+  `SHAPE`, the warning layers `THE_GEOM`. `propertyName` trims the answer
+  (without it a warning comes with its polygon). Municipality ids start
+  with 7 or 8 (`Warnungen_Gemeinden`, `WARNCELLID`), district ids with 1
+  (`Warnungen_Landkreise`, `GC_WARNCELLID`, area name in `AREADESC`); one
+  district message holds several warnings under ONE identifier (dedupe on
+  identifier + event + onset). `ALTITUDE`/`CEILING` are feet; `SEVERITY` is
+  CAP (Minor…Extreme = levels 1 to 4); `URGENCY` Future is an advance
+  notice ("Vorabinformation"); `EC_II` 98/99 and `EC_GROUP` TEST are tests,
+  `STATUS` other than Actual an exercise. The event name is German capitals,
+  translated word by word in `src/i18n.js`. An updated warning gets a NEW
+  identifier: the triggers compare by kind and level, never by id.
 - **Pollen**: `dwd:Pollenfluggebiete` gives `GF`, the part region id of
   `s31fg.json`; regions without part regions (Berlin and Brandenburg, 50)
   are listed with `partregion_id: -1`. The file is issued at 11:00 and dates
@@ -108,8 +123,15 @@ happen only in `src/pivot.js` (and in the widget / scene texts).
   cover, README, docs) says "unofficial connector, not affiliated with the
   DWD". Never use the DWD logo.
 - **Keys are forever**: manifest `config_schema`, `actions`, widget,
-  scene-trigger and level keys (`none`, `low`, `moderate`, `high`) are
-  stored in user scenes and dashboards. Never rename them.
+  scene-trigger, scene-action, pollen level keys (`none`, `low`, `moderate`,
+  `high`), warning kinds (`WARNING_KINDS`) and the `/data` file names are
+  stored in user scenes, dashboards and data. Never rename them.
+- **No duplicate of a core trigger**: the official warnings also go through
+  the pivot alerts (the core "weather alert" trigger); our triggers add the
+  filters by kind and level, the typed cells and the "ended" event.
+- **Scene filters compare values only** (equality and membership): the level
+  is a `multi_select` of 1 to 4, the event sends it as a number (the core
+  converts it to compare with the options).
 - **Gladys awaits `onWeatherGet` under 15 s**: keep the timeout in
   `src/constants.js` (6 s per call, the forecast and the observations in
   parallel) and the caches.
@@ -121,7 +143,10 @@ happen only in `src/pivot.js` (and in the widget / scene texts).
 - **Widget texts are bounded**: a `caption` holds 80 characters, a `body`
   300, a status label 40, a card title 60 (`validateWidgetContent` in the
   tests).
-- **Read-only rootfs**: write nothing outside `/data` (we write nothing).
+- **Read-only rootfs**: write nothing outside `/data`: `warnings.json` (the
+  memory of the warning triggers) and `cells.json` (the names of the typed
+  cells), through `src/store.js`. House coordinates are personal data: never
+  logged nor written.
 - **Versions belong to the Release workflow** (Actions → Release). Never edit
   `version` in `package.json` or in the manifest, nor the `docker_image` tag.
 - **Changelog**: every user-visible change adds a line under
@@ -130,8 +155,10 @@ happen only in `src/pivot.js` (and in the widget / scene texts).
   10 to 100 characters per language; `test/manifest.test.js` ties the
   manifest to the code. `source: "houses"` is refused by the store schema:
   houses are matched by name.
-- **User-facing text** is bilingual, `docs/en.md` and `docs/fr.md` kept in
-  sync. Comments explain why, in English.
+- **User-facing text** exists in English, French and German (`LANGUAGES`
+  in `src/i18n.js`): manifest, widgets, scene events, action messages,
+  `docs/{en,fr,de}.md` kept in sync (German says "du"). Comments explain
+  why, in English.
 - **Tests never touch the network** (`installFetch` throws on an unknown URL)
   and take their clock from `FIXTURE_NOW`: pass `now` down to every parser
   that compares with the current time.

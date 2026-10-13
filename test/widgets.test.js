@@ -13,21 +13,46 @@ const silent = { info() {}, warn() {}, error() {}, debug() {} };
 
 test('the warnings widget lists the warnings in force, valid for the core', () => {
   const alerts = parseWarnings(fixture('warnings-berlin.json'), FIXTURE_NOW);
-  const content = buildWarningsContent(alerts, { utcOffsetMinutes: 120 });
+  const content = buildWarningsContent(alerts, {
+    area: { name: 'Home', timeZone: 'Europe/Berlin' },
+    now: FIXTURE_NOW,
+    language: 'en',
+    fetchedAt: FIXTURE_NOW,
+  });
   assert.deepEqual(validateWidgetContent(content), []);
-  assert.equal(content.components[0].text.fr, '2 avertissements · Modérée');
+  assert.equal(content.components[0].text.fr, 'Temps marquant · 2');
+  // Nothing in force at 02:30 UTC, level 2 later.
+  assert.equal(content.components[1].value.en, 'None');
+  assert.equal(content.components[2].value.de, 'Stufe 2');
+  assert.equal(content.components[2].color, 'warning');
   const list = content.components.find((c) => c.type === 'card-list');
   assert.equal(list.items.length, 2);
-  assert.equal(list.items[0].title.en, 'Storm gusts');
-  assert.equal(list.items[0].subtitle, '13.10 14:00 → 14.10 00:00');
+  assert.equal(list.items[0].title, 'Storm gusts (level 2)');
+  assert.equal(list.items[0].subtitle, '14:00 – tomorrow 00:00');
   assert.equal(list.items[0].badge.color, 'warning');
   assert.ok(list.items[0].description.includes('Handlungsempfehlungen'));
+  assert.equal(content.components.at(-1).text.de, 'DWD-Warnungen für Home, gelesen um 04:30.');
+  // In German the official headline is the title.
+  const german = buildWarningsContent(alerts, {
+    now: Date.parse('2026-10-13T15:00:00Z'),
+    language: 'de',
+  });
+  assert.equal(german.components[1].value.de, 'Stufe 2');
+  assert.equal(
+    german.components.find((c) => c.type === 'card-list').items[0].title,
+    'Amtliche WARNUNG vor STURMBÖEN',
+  );
 });
 
-test('no warning is a green status', () => {
-  const content = buildWarningsContent([]);
+test('no warning is two green tiles', () => {
+  const content = buildWarningsContent([], { language: 'fr' });
   assert.deepEqual(validateWidgetContent(content), []);
-  assert.equal(content.components[1].items[0].color, 'success');
+  assert.equal(content.components[0].text.fr, 'Aucun avertissement');
+  assert.equal(content.components[1].color, 'success');
+  assert.equal(
+    content.components.find((c) => c.type === 'card-list'),
+    undefined,
+  );
 });
 
 test('the pollen widget shows the day, the next days and each pollen', () => {
@@ -70,11 +95,13 @@ test('the widgets resolve the house and answer outside Germany', async () => {
     const watcher = new Watcher({
       gladys,
       provider,
+      getConfig: () => ({ warncell_ids: '103359000' }),
       getPreferences: () => ({}),
       logger: silent,
       now: () => FIXTURE_NOW,
     });
     await watcher.refreshHouses();
+    await watcher.refreshCells();
     const preferences = [];
     const widgets = createWidgets({
       provider,
@@ -84,8 +111,15 @@ test('the widgets resolve the house and answer outside Germany', async () => {
     });
     const warnings = await widgets.warnings.get({ settings: {}, language: 'fr', units: 'metric' });
     assert.deepEqual(validateWidgetContent(warnings), []);
-    assert.equal(warnings.components[0].text.fr, '2 avertissements · Modérée');
+    assert.equal(warnings.components[0].text.fr, 'Temps marquant · 2');
     assert.deepEqual(preferences, [{ language: 'fr', units: 'metric' }]);
+    const cell = await widgets.warnings.get({ settings: { house: '103359000' }, language: 'de' });
+    assert.deepEqual(validateWidgetContent(cell), []);
+    assert.equal(cell.components[0].text.de, 'Keine Warnung');
+    assert.equal(
+      cell.components.at(-1).text.de,
+      'DWD-Warnungen für Kreis Stade, gelesen um 04:30.',
+    );
     const pollen = await widgets.pollen.get({ settings: { house: 'Home' } });
     assert.deepEqual(validateWidgetContent(pollen), []);
     assert.equal(pollen.components[0].text.en, 'Pollen · None');
@@ -93,6 +127,8 @@ test('the widgets resolve the house and answer outside Germany', async () => {
     assert.ok(paris.components[0].text.en.includes('Germany only'));
     const nowhere = await widgets.warnings.get({ settings: { house: 'Nowhere' } });
     assert.ok(nowhere.components[0].text.en.includes('No located house'));
+    const parisWarnings = await widgets.warnings.get({ settings: { house: 'Paris' } });
+    assert.ok(parisWarnings.components[0].text.en.includes('Germany only'));
   } finally {
     restore();
   }

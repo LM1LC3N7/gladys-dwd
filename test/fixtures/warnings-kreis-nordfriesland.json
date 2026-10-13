@@ -1,0 +1,62 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "Warnungen_Landkreise.2.49.0.1.276.DWD.PVW.1791886105084.0.5.901054002",
+      "geometry": null,
+      "properties": {
+        "IDENTIFIER": "2.49.0.1.276.DWD.PVW.1791886105084.0",
+        "STATUS": "Actual",
+        "MSGTYPE": "Alert",
+        "INFO_ID": 5,
+        "EVENT": "WINDBÖEN",
+        "URGENCY": "Immediate",
+        "SEVERITY": "Minor",
+        "EC_II": "51",
+        "EC_GROUP": "WIND",
+        "ONSET": "2026-10-13T06:00:00Z",
+        "EXPIRES": "2026-10-13T12:00:00Z",
+        "HEADLINE": "Amtliche WARNUNG vor WINDBÖEN",
+        "DESCRIPTION": "Es treten Windböen mit Geschwindigkeiten bis 60 km/h (17 m/s, 33 kn, Bft 7) aus südlicher Richtung auf.",
+        "INSTRUCTION": "Hinweis auf: \n · umherfliegende leichte Gegenstände\n\nHandlungsempfehlungen: \n · lose Gegenstände sichern\n · z.B. Zelte und Abdeckungen befestigen",
+        "AREADESC": "Kreis Nordfriesland - Küste",
+        "GC_WARNCELLID": 901054002,
+        "ALTITUDE": 0,
+        "CEILING": 9842.5197
+      },
+      "bbox": [54.2634, 8.2765, 55.0571, 9.1017]
+    },
+    {
+      "type": "Feature",
+      "id": "Warnungen_Landkreise.2.49.0.1.276.DWD.PVW.1791886105084.0.9.901054002",
+      "geometry": null,
+      "properties": {
+        "IDENTIFIER": "2.49.0.1.276.DWD.PVW.1791886105084.0",
+        "STATUS": "Actual",
+        "MSGTYPE": "Alert",
+        "INFO_ID": 9,
+        "EVENT": "STURMBÖEN",
+        "URGENCY": "Immediate",
+        "SEVERITY": "Moderate",
+        "EC_II": "52",
+        "EC_GROUP": "WIND",
+        "ONSET": "2026-10-13T12:00:00Z",
+        "EXPIRES": "2026-10-13T22:00:00Z",
+        "HEADLINE": "Amtliche WARNUNG vor STURMBÖEN",
+        "DESCRIPTION": "Es treten Sturmböen mit Geschwindigkeiten bis 65 km/h (18 m/s, 35 kn, Bft 8) anfangs aus südlicher, später aus nordwestlicher Richtung auf. In Schauernähe sowie in exponierten Lagen muss mit Sturmböen bis 75 km/h (21 m/s, 41 kn, Bft 9) gerechnet werden.",
+        "INSTRUCTION": "Gefahr durch: \n · einzelne herabstürzende Äste\n · umherfliegende Gegenstände\n\nHandlungsempfehlungen: \n · frei stehende Objekte sichern (z.B. Leinwände und Möbel)\n · z.B. Zelte und Abdeckungen befestigen\n · im Freien auf herabfallende Gegenstände (z.B. Äste) achten",
+        "AREADESC": "Kreis Nordfriesland - Küste",
+        "GC_WARNCELLID": 901054002,
+        "ALTITUDE": 0,
+        "CEILING": 9842.5197
+      },
+      "bbox": [54.2634, 8.2765, 55.0571, 9.1017]
+    }
+  ],
+  "totalFeatures": 2,
+  "numberMatched": 2,
+  "numberReturned": 2,
+  "timeStamp": "2026-10-13T10:17:28.196Z",
+  "crs": null
+}

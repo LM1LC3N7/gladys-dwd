@@ -25,6 +25,9 @@ radar cover **Germany**.
 4. In the **Configuration** screen, click **Test the DWD sources**: the
    message says what each source answered (forecasts, warnings, pollen) and
    which stations are used.
+5. Optional: add **warn cells** (a holiday home, your parents' town, a whole
+   district) by their DWD id; the **Find a warn cell** button searches the
+   municipalities by name.
 
 Once installed, the integration takes precedence over the OpenWeather service
 built into Gladys. The weather widget can also pick it explicitly.
@@ -60,6 +63,10 @@ uses: the DWD publishes none in its open data.
   scene trigger of Gladys. When a warning appears, changes level or ends,
   the integration tells Gladys within minutes instead of waiting for its
   30-minute check. Germany only.
+- **Additional warn cells** (empty by default) — DWD warn cell ids (9
+  digits, separated by commas): a municipality (ids starting with 7 or 8)
+  or a whole district (ids starting with 1). Their warnings feed the widget,
+  the scene triggers and the scene action, not the weather of the houses.
 - **Pollen alerts** (off by default) — adds an alert when the pollen index
   of your region reaches a moderate exposure (2 on the DWD scale), raised to
   "moderate" severity at a high exposure (3). Not an official warning.
@@ -72,15 +79,18 @@ uses: the DWD publishes none in its open data.
 
 ## The "DWD warnings" widget
 
-The warnings in force at the house, most severe first, each with:
+For a house in Germany or a typed warn cell:
 
-- its **severity** (minor, moderate, severe, extreme: the four levels of
-  the DWD, yellow to purple);
-- its **period** (start and end, local time);
-- the DWD **description** and **advice** (in German), in the detail panel.
+- two tiles, the **level now** and the **level later** (the four levels of
+  the DWD: 1 weather warning, 2 significant weather, 3 severe weather,
+  4 extreme weather);
+- the warnings in force, then the announced ones (and the advance notices
+  of severe weather), most severe first, each with its **period** in local
+  time, a **level badge** and the official DWD **text and advice** (in
+  German) in the detail panel; in German the title is the official headline.
 
-**House** setting: the name of the house to show. Empty, it is the first
-located house.
+**House or warn cell** setting: the name of the house, or a warn cell id of
+the configuration. Empty, it is the first area followed.
 
 ## The "Pollen" widget
 
@@ -105,12 +115,40 @@ around 11:00; before that, the forecast of the day before applies.
 
 ## Scenes
 
-One trigger, checked every 5 minutes:
+Three triggers, checked every 5 minutes:
 
+- **DWD warning issued** — the DWD issued a warning for an area (a house in
+  Germany or a warn cell), raised its level, or turned an advance notice
+  into a warning. Filters: **area** (house name or cell id), **levels**
+  (tick 3 and 4 for severe weather only), **warning types** (thunderstorms,
+  wind, rain, snow, frost, ice, thaw, fog, heat, UV, other). Variables:
+  `title`, `type`, `level` (1 to 4), `level_name`, `start`, `end` (local,
+  as "tomorrow 06:00"), `in_force`, `description` and `instruction` (the
+  German texts), `summary`, `area_name`, `house`.
+- **DWD warning ended** — no warning of a type remains for an area: its end
+  time passed and the DWD did not extend it. Filters: area, types.
 - **Pollen level changed** — the pollen index of a house (its highest
   pollen of the day) reaches a new level.
 
-Filters, all optional:
+Warnings are compared by type and level, never by the DWD identifier (an
+updated warning gets a new one): an update at the same level fires
+nothing. What was announced is kept in the integration data: a restart
+fires nothing again, and a warning issued meanwhile fires once.
+
+One scene action:
+
+- **Current DWD warnings** — a summary of the warnings in force and
+  announced, ready to send in a message (`{{summary}}`), with `count`,
+  `current_level` and `upcoming_level` for a following condition. Field
+  **area**: a house name or a cell id, empty for all.
+
+Examples: a level 3 or 4 warning → send "{{triggerEvent.data.title}},
+{{triggerEvent.data.start}} – {{triggerEvent.data.end}}" and close the
+shutters; wind or thunderstorms from level 2 → "put the garden furniture
+away"; every morning at 7, the summary of the day on Telegram when there
+is one.
+
+Pollen filters, all optional:
 
 - **Level reached** — e.g. "High". The scene fires even when the index jumps
   over this level (from "none" to "high").

@@ -43,7 +43,7 @@ import { sunElevation } from './sun.js';
 import { pollenAlerts } from './assessment.js';
 import { fetchMosmix, parseMosmix } from './sources/dwdMosmix.js';
 import { currentObservation, fetchObservations } from './sources/dwdObservations.js';
-import { fetchWarnings } from './sources/dwdWarnings.js';
+import { fetchCellWarnings, fetchWarnings } from './sources/dwdWarnings.js';
 import { fetchPollen, fetchPollenRegion } from './sources/dwdPollen.js';
 import { fetchUv, nearestUvCity } from './sources/dwdUv.js';
 import { buildRadarImage } from './sources/dwdRadar.js';
@@ -219,21 +219,39 @@ export class WeatherProvider {
 
   /** Official DWD warnings at a location (empty when disabled or abroad). */
   async getAlerts(latitude, longitude, { force = false } = {}) {
-    if (!this.getConfig().official_alerts || !isInGermanyArea(latitude, longitude)) {
+    if (!isInGermanyArea(latitude, longitude)) {
       return [];
     }
-    const key = locationKey(latitude, longitude);
+    return this.getAlertsFor(
+      { key: locationKey(latitude, longitude), latitude, longitude },
+      { force },
+    );
+  }
+
+  /**
+   * Official DWD warnings of an area: a located house (`latitude`,
+   * `longitude`) or a warn cell typed by the user (`cellId`). Empty when the
+   * warnings are disabled; the last answer (up to an hour) when the DWD
+   * fails. `fetchedAt` tells when the DWD answered.
+   */
+  async getAlertsFor(area, { force = false } = {}) {
+    if (!this.getConfig().official_alerts) {
+      return [];
+    }
+    const key = area.cellId ? `cell:${area.cellId}` : locationKey(area.latitude, area.longitude);
     const cached = this.alerts.get(key);
     if (!force && cached && this.now() - cached.fetchedAt < ALERTS_TTL) {
       return cached.alerts;
     }
     return this.share(`alerts:${key}`, async () => {
       try {
-        const alerts = await fetchWarnings(latitude, longitude, {
-          timeout: HTTP_TIMEOUT,
-          now: this.now(),
-        });
-        this.alerts.set(key, { alerts, fetchedAt: this.now() });
+        const options = { timeout: HTTP_TIMEOUT, now: this.now() };
+        const alerts = area.cellId
+          ? await fetchCellWarnings(area.cellId, options)
+          : await fetchWarnings(area.latitude, area.longitude, options);
+        const fetchedAt = this.now();
+        alerts.fetchedAt = fetchedAt;
+        this.alerts.set(key, { alerts, fetchedAt });
         return alerts;
       } catch (err) {
         this.logger.warn(`DWD warnings failed: ${err.message}`);
@@ -244,6 +262,12 @@ export class WeatherProvider {
         return [];
       }
     });
+  }
+
+  /** The cached warnings of an area, without fetching (undefined when none). */
+  cachedAlerts(area) {
+    const key = area.cellId ? `cell:${area.cellId}` : locationKey(area.latitude, area.longitude);
+    return this.alerts.get(key)?.alerts;
   }
 
   /** The pollen region of a location (or null when outside), cached a day. */

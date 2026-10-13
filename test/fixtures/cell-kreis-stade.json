@@ -1,0 +1,17 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "Warngebiete_Kreise.fid--4bff9026_1a134c27e79_19c7",
+      "geometry": null,
+      "properties": { "WARNCELLID": 103359000, "NAME": "Kreis Stade" },
+      "bbox": [53.3382, 9.0128, 53.8635, 9.7832]
+    }
+  ],
+  "totalFeatures": 1,
+  "numberMatched": 1,
+  "numberReturned": 1,
+  "timeStamp": "2026-10-13T10:15:39.417Z",
+  "crs": null
+}

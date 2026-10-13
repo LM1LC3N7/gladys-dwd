@@ -4,10 +4,11 @@
 //
 // SDK wiring only — the logic lives in src/:
 //   provider.js      DWD sources, caches, warnings, pollen, UV -> pivot weather
-//   watcher.js       background loop: warnings nudge, scene events, widget nudges
-//   widgets.js       "Warnings" and "Pollen" dashboard widgets
-//   sceneTriggers.js pollen level scene trigger
-//   actions.js       Configuration screen "test" button
+//   watcher.js       background loop: areas, warnings and pollen events, nudges
+//   widgets.js       "DWD warnings" and "Pollen" dashboard widgets
+//   sceneTriggers.js pollen level, warning issued / ended scene triggers
+//   scenes.js        "Current DWD warnings" scene action
+//   actions.js       Configuration screen buttons
 //
 // Handlers are registered BEFORE connect(). The three GLADYS_* environment
 // variables are injected by the Gladys supervisor and read by the SDK.
@@ -19,6 +20,8 @@ import { NoStationError, WeatherProvider } from './src/provider.js';
 import { Watcher } from './src/watcher.js';
 import { createWidgets } from './src/widgets.js';
 import { createActions } from './src/actions.js';
+import { createSceneActions } from './src/scenes.js';
+import { createStore } from './src/store.js';
 import { UNITS } from './src/pivot.js';
 
 const gladys = new GladysIntegration();
@@ -53,21 +56,30 @@ function reportStatus({ ok, source, error }) {
     message = {
       en: 'No DWD forecast point near your house: the DWD covers Europe.',
       fr: 'Aucun point de prévision du DWD près de votre maison : le DWD couvre l’Europe.',
+      de: 'Kein DWD-Vorhersagepunkt in der Nähe deines Zuhauses: der DWD deckt Europa ab.',
     };
   } else if (!ok) {
     message = {
       en: 'The DWD does not answer, check the logs.',
       fr: 'Le DWD ne répond pas, consultez les logs.',
+      de: 'Der DWD antwortet nicht, siehe die Logs.',
     };
   }
   gladys.setConnectionStatus(ok, message).catch(() => {});
 }
 
 const provider = new WeatherProvider({ getConfig: () => config, onStatus: reportStatus });
-const watcher = new Watcher({ gladys, provider, getPreferences: () => preferences });
+const watcher = new Watcher({
+  gladys,
+  provider,
+  getConfig: () => config,
+  getPreferences: () => preferences,
+  store: createStore(),
+});
+const deps = { provider, watcher, getConfig: () => config, getPreferences: () => preferences };
 
 // --- Weather (manifest type "weather", contract B.18) -----------------------
-// Answered under 15 s; the cache (10 min) keeps it far below in practice.
+// Answered under 15 s; the cache (15 min) keeps it far below in practice.
 gladys.onWeatherGet(async (options) => {
   logger.debug(`onWeatherGet <- ${options.language}/${options.units}`);
   rememberPreferences(options, false);
@@ -80,16 +92,17 @@ gladys.onWeatherGetImage(async (key) => {
 });
 
 // --- Dashboard widgets (Gladys 5.1+) ----------------------------------------
-for (const [key, widget] of Object.entries(
-  createWidgets({ provider, watcher, rememberPreferences }),
-)) {
+for (const [key, widget] of Object.entries(createWidgets({ ...deps, rememberPreferences }))) {
   gladys.onWidgetGet(key, (request) => widget.get(request));
 }
 
+// --- Scene actions -----------------------------------------------------------
+for (const [key, handler] of Object.entries(createSceneActions(deps))) {
+  gladys.onSceneAction(key, (fields) => handler(fields));
+}
+
 // --- Configuration screen buttons --------------------------------------------
-for (const [key, handler] of Object.entries(
-  createActions({ watcher, provider, getConfig: () => config }),
-)) {
+for (const [key, handler] of Object.entries(createActions(deps))) {
   gladys.onAction(key, (fields) => handler(fields));
 }
 
@@ -97,10 +110,10 @@ for (const [key, handler] of Object.entries(
 gladys.onConfigUpdated((newConfig) => {
   logger.info('Configuration updated');
   config = normalizeConfig(newConfig);
-  // Alerts and images depend on it: start from scratch.
+  // Alerts, areas and images depend on it: start from scratch.
   provider.clear();
   gladys.requestWeatherRefresh();
-  watcher.tick();
+  watcher.reloadAreas();
 });
 
 // --- Connection lifecycle ----------------------------------------------------
@@ -117,6 +130,7 @@ gladys.on('connected', async () => {
       .setConnectionStatus(false, {
         en: 'Initialization failed, check the integration logs.',
         fr: "L'initialisation a échoué, consultez les logs de l'intégration.",
+        de: 'Die Initialisierung ist fehlgeschlagen, siehe die Logs der Integration.',
       })
       .catch(() => {});
   }

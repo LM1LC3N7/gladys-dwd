@@ -16,14 +16,14 @@ export const POLLEN_KEYS_IN_SEASON_ORDER = [
 ];
 
 export const POLLEN_NAMES = {
-  Hasel: { en: 'Hazel', fr: 'Noisetier' },
-  Erle: { en: 'Alder', fr: 'Aulne' },
-  Esche: { en: 'Ash', fr: 'Frêne' },
-  Birke: { en: 'Birch', fr: 'Bouleau' },
-  Graeser: { en: 'Grasses', fr: 'Graminées' },
-  Roggen: { en: 'Rye', fr: 'Seigle' },
-  Beifuss: { en: 'Mugwort', fr: 'Armoise' },
-  Ambrosia: { en: 'Ragweed', fr: 'Ambroisie' },
+  Hasel: { en: 'Hazel', fr: 'Noisetier', de: 'Hasel' },
+  Erle: { en: 'Alder', fr: 'Aulne', de: 'Erle' },
+  Esche: { en: 'Ash', fr: 'Frêne', de: 'Esche' },
+  Birke: { en: 'Birch', fr: 'Bouleau', de: 'Birke' },
+  Graeser: { en: 'Grasses', fr: 'Graminées', de: 'Gräser' },
+  Roggen: { en: 'Rye', fr: 'Seigle', de: 'Roggen' },
+  Beifuss: { en: 'Mugwort', fr: 'Armoise', de: 'Beifuß' },
+  Ambrosia: { en: 'Ragweed', fr: 'Ambroisie', de: 'Ambrosia' },
 };
 
 // The DWD scale: 0 none, 1 low, 2 moderate, 3 high; halves in between.
@@ -31,37 +31,41 @@ export const POLLEN_LEVELS = [
   {
     key: 'none',
     rank: 0,
-    label: { en: 'None', fr: 'Aucune' },
+    label: { en: 'None', fr: 'Aucune', de: 'Keine' },
     advice: {
       en: 'No pollen exposure expected.',
       fr: 'Aucune exposition aux pollens attendue.',
+      de: 'Keine Pollenbelastung erwartet.',
     },
   },
   {
     key: 'low',
     rank: 1,
-    label: { en: 'Low', fr: 'Faible' },
+    label: { en: 'Low', fr: 'Faible', de: 'Gering' },
     advice: {
       en: 'Only the most sensitive people notice it.',
       fr: 'Seules les personnes les plus sensibles le ressentent.',
+      de: 'Nur sehr empfindliche Menschen merken etwas.',
     },
   },
   {
     key: 'moderate',
     rank: 2,
-    label: { en: 'Moderate', fr: 'Moyenne' },
+    label: { en: 'Moderate', fr: 'Moyenne', de: 'Mittel' },
     advice: {
       en: 'Allergy sufferers feel symptoms: keep the windows closed in the morning, ventilate in the evening.',
       fr: 'Les personnes allergiques ressentent des symptômes : fenêtres fermées le matin, aération le soir.',
+      de: 'Allergiker spüren Beschwerden: morgens die Fenster geschlossen halten, abends lüften.',
     },
   },
   {
     key: 'high',
     rank: 3,
-    label: { en: 'High', fr: 'Forte' },
+    label: { en: 'High', fr: 'Forte', de: 'Hoch' },
     advice: {
       en: 'Strong symptoms for allergy sufferers: limit the time outdoors, take the treatment prescribed.',
       fr: 'Symptômes forts pour les personnes allergiques : limiter le temps dehors, suivre le traitement prescrit.',
+      de: 'Starke Beschwerden für Allergiker: weniger Zeit im Freien, die verordneten Mittel nehmen.',
     },
   },
 ];

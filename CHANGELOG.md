@@ -10,6 +10,22 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+### Added
+
+- Scene triggers "DWD warning issued" and "DWD warning ended", filterable by
+  area, levels (1 to 4) and warning types, with the title, period, texts
+  and advice as variables; what was announced is kept in `/data`, so a
+  restart fires nothing again.
+- Scene action "Current DWD warnings": a summary ready to send, with the
+  count and the levels now and later.
+- Additional warn cells (municipalities and districts by DWD id) followed
+  next to the houses, and the "Find a warn cell" button to search them by
+  name.
+- "DWD warnings" widget: the levels now and later as tiles, the advance
+  notices, a cell or a house as its area; a warning that starts moves the
+  widget within the minute.
+- German texts everywhere (manifest, widgets, scene events, documentation).
+
 ## [1.0.0] - 2026-10-13
 
 ### Added

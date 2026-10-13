@@ -9,22 +9,19 @@ import { BERLIN, FIXTURE_NOW, berlinRoutes, installFetch, json } from './helpers
 
 const silent = { info() {}, warn() {}, error() {}, debug() {} };
 
-function setup(houses) {
-  const provider = new WeatherProvider({ logger: silent, now: () => FIXTURE_NOW });
+function setup(houses, config = {}) {
+  const getConfig = () => ({ ...DEFAULT_CONFIG, ...config });
+  const provider = new WeatherProvider({ logger: silent, now: () => FIXTURE_NOW, getConfig });
   const gladys = createFakeGladys({ houses });
   const watcher = new Watcher({
     gladys,
     provider,
+    getConfig,
     getPreferences: () => ({}),
     logger: silent,
     now: () => FIXTURE_NOW,
   });
-  const actions = createActions({
-    watcher,
-    provider,
-    getConfig: () => DEFAULT_CONFIG,
-    now: () => FIXTURE_NOW,
-  });
+  const actions = createActions({ watcher, provider, getConfig, now: () => FIXTURE_NOW });
   return { watcher, actions };
 }
 
@@ -65,8 +62,34 @@ test('test_sources says what failed, and what is not available abroad', async ()
   }
 });
 
-test('test_sources without a house says so', async () => {
-  const { actions } = setup([]);
-  const result = await actions.test_sources();
-  assert.match(result.fr, /Aucune position/);
+test('test_sources without a house says so, and still checks the typed cells', async () => {
+  const { restore } = installFetch(berlinRoutes());
+  try {
+    const { watcher, actions } = setup([], { warncell_ids: '103359000,901054002' });
+    await watcher.refreshCells();
+    const result = await actions.test_sources();
+    assert.match(result.fr, /Aucune maison localisée/);
+    assert.match(result.en, /Cell 103359000: OK \(Kreis Stade, 0 in force\)/);
+    assert.match(result.en, /Cell 901054002: failed \(unknown warn cell id\)/);
+    assert.match(result.de, /Zelle 103359000: OK/);
+  } finally {
+    restore();
+  }
+});
+
+test('find_warncell searches the municipalities by name', async () => {
+  const { restore } = installFetch(berlinRoutes());
+  try {
+    const { actions } = setup([]);
+    const result = await actions.find_warncell({ query: 'Garmisch' });
+    assert.match(
+      result.en,
+      /Gemeinde Garmisch-Partenkirchen \(Garmisch-Partenkirchen\): 809180117/,
+    );
+    assert.match(result.de, /Warnzellen:/);
+    const short = await actions.find_warncell({ query: 'G' });
+    assert.match(short.fr, /au moins deux lettres/);
+  } finally {
+    restore();
+  }
 });

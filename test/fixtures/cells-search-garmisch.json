@@ -1,0 +1,21 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "Warngebiete_Gemeinden.809180117",
+      "geometry": null,
+      "properties": {
+        "WARNCELLID": 809180117,
+        "NAME": "Gemeinde Garmisch-Partenkirchen",
+        "KREIS": "Garmisch-Partenkirchen"
+      },
+      "bbox": [47.3937, 10.8695, 47.5487, 11.2236]
+    }
+  ],
+  "totalFeatures": 1,
+  "numberMatched": 1,
+  "numberReturned": 1,
+  "timeStamp": "2026-10-13T10:15:36.385Z",
+  "crs": null
+}

@@ -26,6 +26,9 @@ pollens, UV et radar couvrent l’**Allemagne**.
 4. Dans l’écran **Configuration**, cliquez sur **Tester les sources du
    DWD** : le message dit ce que chaque source a répondu (prévisions,
    avertissements, pollens) et quelles stations sont utilisées.
+5. Facultatif : ajoutez des **cellules d’alerte** (maison de vacances,
+   ville des parents, district entier) par leur identifiant DWD ; le bouton
+   **Trouver une cellule d’alerte** cherche les communes par leur nom.
 
 Une fois installée, l’intégration prend le pas sur le service OpenWeather
 intégré à Gladys. Le widget météo peut aussi la choisir explicitement.
@@ -64,6 +67,11 @@ le DWD n’en publie pas dans ses données ouvertes.
   apparaît, change de niveau ou se termine, l’intégration prévient Gladys en
   quelques minutes au lieu d’attendre sa vérification toutes les 30 minutes.
   Allemagne seulement.
+- **Cellules d’alerte supplémentaires** (vide par défaut) — identifiants de
+  cellules d’alerte du DWD (9 chiffres, séparés par des virgules) : une
+  commune (identifiants commençant par 7 ou 8) ou un district entier
+  (commençant par 1). Leurs avertissements alimentent le widget, les
+  déclencheurs et l’action de scène, pas la météo des maisons.
 - **Alertes pollens** (désactivé par défaut) — ajoute une alerte quand
   l’indice pollinique de votre région atteint une exposition moyenne (2 sur
   l’échelle du DWD), relevée en sévérité « modérée » à une exposition forte
@@ -78,17 +86,20 @@ le DWD n’en publie pas dans ses données ouvertes.
 
 ## Le widget « Avertissements DWD »
 
-Les avertissements en cours pour la maison, du plus sévère au moins sévère,
-chacun avec :
+Pour une maison en Allemagne ou une cellule d’alerte saisie :
 
-- sa **sévérité** (mineure, modérée, sévère, extrême : les quatre niveaux du
-  DWD, du jaune au violet) ;
-- sa **période** (début et fin, heure locale) ;
-- la **description** et les **conseils** du DWD (en allemand), dans le
-  panneau de détail.
+- deux tuiles, le **niveau actuel** et le **niveau à venir** (les quatre
+  niveaux du DWD : 1 avertissement, 2 temps marquant, 3 fortes intempéries,
+  4 intempéries extrêmes) ;
+- les avertissements en cours, puis ceux annoncés (et les préavis
+  d’intempéries), du plus sévère au moins sévère, chacun avec sa **période**
+  en heure locale, un **badge de niveau** et le **texte officiel** du DWD
+  avec ses conseils (en allemand) dans le panneau de détail ; en allemand,
+  le titre est le titre officiel.
 
-Réglage **Maison** : le nom de la maison à afficher. Vide, c’est la première
-maison localisée.
+Réglage **Maison ou cellule d’alerte** : le nom de la maison, ou un
+identifiant de cellule de la configuration. Vide, c’est la première zone
+suivie.
 
 ## Le widget « Pollens »
 
@@ -116,12 +127,44 @@ de la veille qui s’applique.
 
 ## Scènes
 
-Un déclencheur, vérifié toutes les 5 minutes :
+Trois déclencheurs, vérifiés toutes les 5 minutes :
 
+- **Avertissement DWD émis** — le DWD a émis un avertissement pour une zone
+  (une maison en Allemagne ou une cellule d’alerte), relevé son niveau, ou
+  transformé un préavis en avertissement. Filtres : **zone** (nom de la
+  maison ou identifiant de cellule), **niveaux** (cochez 3 et 4 pour les
+  seules fortes intempéries), **types** (orages, vent, pluie, neige, gel,
+  verglas, dégel, brouillard, chaleur, UV, autre). Variables : `title`,
+  `type`, `level` (1 à 4), `level_name`, `start`, `end` (en heure locale,
+  « demain 06:00 »), `in_force`, `description` et `instruction` (les textes
+  allemands), `summary`, `area_name`, `house`.
+- **Avertissement DWD levé** — plus aucun avertissement d’un type pour une
+  zone : son heure de fin est passée et le DWD ne l’a pas prolongé.
+  Filtres : zone, types.
 - **Niveau de pollens changé** — l’indice pollinique d’une maison (son
   pollen le plus présent du jour) atteint un nouveau niveau.
 
-Filtres, tous facultatifs :
+Les avertissements sont comparés par type et niveau, jamais par
+l’identifiant du DWD (une mise à jour en reçoit un nouveau) : une mise à
+jour au même niveau ne déclenche rien. Ce qui a été annoncé est conservé
+dans les données de l’intégration : un redémarrage ne redéclenche rien, et
+un avertissement émis entre-temps se déclenche une fois.
+
+Une action de scène :
+
+- **Avertissements DWD en cours** — un résumé des avertissements en cours
+  et annoncés, prêt à envoyer dans un message (`{{summary}}`), avec
+  `count`, `current_level` et `upcoming_level` pour une condition suivante.
+  Champ **zone** : un nom de maison ou un identifiant de cellule, vide pour
+  toutes.
+
+Exemples : un avertissement de niveau 3 ou 4 → envoyer
+« {{triggerEvent.data.title}}, {{triggerEvent.data.start}} –
+{{triggerEvent.data.end}} » et fermer les volets ; vent ou orages dès le
+niveau 2 → « rangez le salon de jardin » ; chaque matin à 7 h, le résumé du
+jour sur Telegram quand il y en a un.
+
+Filtres pollens, tous facultatifs :
 
 - **Niveau atteint** — ex. « Forte ». La scène se déclenche même si l’indice
   saute ce niveau (de « aucune » à « forte »).

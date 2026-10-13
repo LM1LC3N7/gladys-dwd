@@ -29,10 +29,9 @@ export function upcomingHours(snapshot, now = Date.now(), span = 24) {
   });
 }
 
-/** Language of the texts we hold (French or English). */
-export function textLanguage(language) {
-  return typeof language === 'string' && language.toLowerCase().startsWith('fr') ? 'fr' : 'en';
-}
+import { textLanguage } from './i18n.js';
+
+export { textLanguage };
 
 export function converters(units) {
   const us = units === UNITS.US;

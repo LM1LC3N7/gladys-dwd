@@ -28,7 +28,9 @@
 - [ ] Bio-weather ("Biowetter") and thermal stress ("gt.json") of the DWD
       health service, as a widget.
 - [ ] Warnings of the coasts and lakes (`dwd:Warnungen_Kueste`,
-      `dwd:Warnungen_Binnenseen`) for houses by the sea.
+      `dwd:Warnungen_Binnenseen`) for houses by the sea (the coast cells,
+      ids starting with 9, are read through the district layer today).
+- [ ] Spanish texts (guim31's DWD warnings integration has them).
 - [ ] A "rain in the next hour" trigger from the RV radar forecast.
 - [ ] Austria (GeoSphere) and Switzerland (MeteoSwiss) warnings for the
       MOSMIX users there.

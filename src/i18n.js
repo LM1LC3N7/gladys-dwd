@@ -1,8 +1,18 @@
 // -----------------------------------------------------------------------------
-// User-facing texts computed at runtime (French and English). Static texts
-// live in the manifest; widget texts are multi-language objects picked by the
-// core, except where a value is formatted into them.
+// User-facing texts computed at runtime (English, French, German). Static
+// texts live in the manifest; widget texts are multi-language objects picked
+// by the core, except where a value is formatted into them.
 // -----------------------------------------------------------------------------
+
+export const LANGUAGES = ['en', 'fr', 'de'];
+
+/** Language of the texts we hold: French, German, else English. */
+export function textLanguage(language) {
+  const code = String(language ?? '')
+    .toLowerCase()
+    .slice(0, 2);
+  return LANGUAGES.includes(code) ? code : 'en';
+}
 
 /** "−12" with a real minus sign, as the weather sites print it. */
 export function signed(value) {
@@ -21,11 +31,200 @@ export function localDayClock(instant, utcOffsetMinutes = 0) {
 }
 
 export const SEVERITY_LABELS = {
-  minor: { en: 'Minor', fr: 'Mineure' },
-  moderate: { en: 'Moderate', fr: 'Modérée' },
-  severe: { en: 'Severe', fr: 'Sévère' },
-  extreme: { en: 'Extreme', fr: 'Extrême' },
+  minor: { en: 'Minor', fr: 'Mineure', de: 'Gering' },
+  moderate: { en: 'Moderate', fr: 'Modérée', de: 'Mäßig' },
+  severe: { en: 'Severe', fr: 'Sévère', de: 'Schwer' },
+  extreme: { en: 'Extreme', fr: 'Extrême', de: 'Extrem' },
 };
+
+// The four levels of the DWD, with 0 for "no warning".
+export const LEVEL_NAMES = {
+  en: ['No warning', 'Weather warning', 'Significant weather', 'Severe weather', 'Extreme weather'],
+  fr: [
+    'Aucun avertissement',
+    'Avertissement',
+    'Temps marquant',
+    'Fortes intempéries',
+    'Intempéries extrêmes',
+  ],
+  de: ['Keine Warnung', 'Wetterwarnung', 'Markantes Wetter', 'Unwetter', 'Extremes Unwetter'],
+};
+
+export const KIND_NAMES = {
+  en: {
+    thunderstorm: 'Thunderstorms',
+    wind: 'Wind',
+    rain: 'Rain',
+    snow: 'Snow',
+    frost: 'Frost',
+    ice: 'Ice',
+    thaw: 'Thaw',
+    fog: 'Fog',
+    heat: 'Heat',
+    uv: 'High UV index',
+    other: 'Other',
+  },
+  fr: {
+    thunderstorm: 'Orages',
+    wind: 'Vent',
+    rain: 'Pluie',
+    snow: 'Neige',
+    frost: 'Gel',
+    ice: 'Verglas',
+    thaw: 'Dégel',
+    fog: 'Brouillard',
+    heat: 'Chaleur',
+    uv: 'Indice UV élevé',
+    other: 'Autre',
+  },
+  de: {
+    thunderstorm: 'Gewitter',
+    wind: 'Wind',
+    rain: 'Regen',
+    snow: 'Schnee',
+    frost: 'Frost',
+    ice: 'Glätte',
+    thaw: 'Tauwetter',
+    fog: 'Nebel',
+    heat: 'Hitze',
+    uv: 'Hoher UV-Index',
+    other: 'Sonstiges',
+  },
+};
+
+export const WORDS = {
+  en: {
+    now: 'Now',
+    later: 'Later',
+    none: 'None',
+    tomorrow: 'tomorrow',
+    until: (t) => `until ${t}`,
+    from: (t) => `from ${t}`,
+    inForce: 'in force',
+    watch: 'Advance notice',
+    level: (n) => `Level ${n}`,
+  },
+  fr: {
+    now: 'Maintenant',
+    later: 'À venir',
+    none: 'Aucun',
+    tomorrow: 'demain',
+    until: (t) => `jusqu’à ${t}`,
+    from: (t) => `à partir de ${t}`,
+    inForce: 'en cours',
+    watch: 'Préavis',
+    level: (n) => `Niveau ${n}`,
+  },
+  de: {
+    now: 'Jetzt',
+    later: 'Später',
+    none: 'Keine',
+    tomorrow: 'morgen',
+    until: (t) => `bis ${t}`,
+    from: (t) => `ab ${t}`,
+    inForce: 'aktiv',
+    watch: 'Vorabinformation',
+    level: (n) => `Stufe ${n}`,
+  },
+};
+
+const formatters = new Map();
+function formatter(key, make) {
+  if (!formatters.has(key)) {
+    formatters.set(key, make());
+  }
+  return formatters.get(key);
+}
+
+const LOCALES = { en: 'en-GB', fr: 'fr-FR', de: 'de-DE' };
+
+export function localDateIn(ms, timeZone) {
+  return formatter(
+    `date:${timeZone}`,
+    () =>
+      new Intl.DateTimeFormat('en-CA', {
+        timeZone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }),
+  ).format(ms);
+}
+
+export function clock(ms, timeZone) {
+  return formatter(
+    `clock:${timeZone}`,
+    () =>
+      new Intl.DateTimeFormat('en-GB', {
+        timeZone,
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23',
+      }),
+  ).format(ms);
+}
+
+/**
+ * An instant as a person says it: "14:00" today, "tomorrow 06:00", "Thu
+ * 15/10 14:00" further away.
+ * @param {number} ms
+ * @param {{ now: number, timeZone: string, language: string }} context
+ */
+export function when(ms, { now, timeZone, language }) {
+  const day = localDateIn(ms, timeZone);
+  const time = clock(ms, timeZone);
+  const today = localDateIn(now, timeZone);
+  if (day === today) {
+    return time;
+  }
+  // The calendar day after today, whatever the length of today (23 or 25 h).
+  const tomorrow = new Date(`${today}T00:00:00Z`);
+  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+  if (tomorrow.toISOString().slice(0, 10) === day) {
+    return `${WORDS[language].tomorrow} ${time}`;
+  }
+  const date = formatter(
+    `day:${language}:${timeZone}`,
+    () =>
+      new Intl.DateTimeFormat(LOCALES[language], {
+        timeZone,
+        weekday: 'short',
+        day: 'numeric',
+        month: 'numeric',
+      }),
+  ).format(ms);
+  return `${date} ${time}`;
+}
+
+/** "until 22:00", "from tomorrow 06:00", "14:00 – 22:00". */
+export function period(warning, active, context) {
+  const words = WORDS[context.language];
+  const { onsetMs: onset, expiresMs: expires } = warning;
+  if (active) {
+    return expires === undefined ? words.inForce : words.until(when(expires, context));
+  }
+  if (onset === undefined) {
+    return expires === undefined ? '' : words.until(when(expires, context));
+  }
+  if (expires === undefined) {
+    return words.from(when(onset, context));
+  }
+  const sameDay = localDateIn(onset, context.timeZone) === localDateIn(expires, context.timeZone);
+  const end = sameDay ? clock(expires, context.timeZone) : when(expires, context);
+  return `${when(onset, context)} – ${end}`;
+}
+
+/**
+ * The title of a warning: the official headline in German, the translated
+ * event with its level in English and French.
+ */
+export function warningTitle(warning, language) {
+  if (language === 'de') {
+    return warning.headline || warning.event?.de || '';
+  }
+  const name = warning.event?.[language] ?? warning.event?.en ?? warning.headline ?? '';
+  return `${name} (${WORDS[language].level(warning.level).toLowerCase()})`;
+}
 
 // The words of the DWD warning event names (a closed vocabulary: the
 // warning criteria of the DWD), in the order they are matched. Longer
@@ -93,7 +292,7 @@ const capitalize = (text) =>
 /**
  * The DWD event name ("SCHWERES GEWITTER mit HEFTIGEM STARKREGEN") in
  * English and French, word by word; an unknown word stays as it is, in
- * lower case. `undefined` without an event.
+ * lower case. The German keeps the original. `undefined` without an event.
  */
 export function translateEvent(event, headline) {
   const source = String(event ?? '').trim() || String(headline ?? '').trim();
@@ -121,5 +320,9 @@ export function translateEvent(event, headline) {
       i += 1;
     }
   }
-  return { en: capitalize(out.en.join(' ')), fr: capitalize(out.fr.join(' ')), de: source };
+  return {
+    en: capitalize(out.en.join(' ')),
+    fr: capitalize(out.fr.join(' ')),
+    de: capitalize(source.toLowerCase()),
+  };
 }

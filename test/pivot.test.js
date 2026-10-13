@@ -12,7 +12,8 @@ import {
 test('textLanguage picks French or English', () => {
   assert.equal(textLanguage('fr'), 'fr');
   assert.equal(textLanguage('fr-CA'), 'fr');
-  assert.equal(textLanguage('de'), 'en');
+  assert.equal(textLanguage('de'), 'de');
+  assert.equal(textLanguage('es'), 'en');
   assert.equal(textLanguage(undefined), 'en');
 });
 

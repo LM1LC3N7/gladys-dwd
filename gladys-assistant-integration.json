@@ -4,7 +4,8 @@
   "name": "DWD (Deutscher Wetterdienst)",
   "description": {
     "en": "German weather service forecasts, warnings, pollen and UV index, radar. Unofficial.",
-    "fr": "Prévisions du service météo allemand, avertissements, pollens, indice UV, radar. Non officiel."
+    "fr": "Prévisions du service météo allemand, avertissements, pollens, indice UV, radar. Non officiel.",
+    "de": "Vorhersagen des DWD, amtliche Warnungen, Pollen- und UV-Index, Regenradar. Inoffiziell."
   },
   "version": "1.0.0",
   "docker_image": "ghcr.io/lm1lc3n7/gladys-dwd:1.0.0",
@@ -19,25 +20,29 @@
       "type": "section",
       "label": {
         "en": "Deutscher Wetterdienst weather",
-        "fr": "Météo du Deutscher Wetterdienst"
+        "fr": "Météo du Deutscher Wetterdienst",
+        "de": "Wetter vom Deutschen Wetterdienst"
       },
       "description": {
         "en": "The forecasts of the German national weather service (DWD) for the location of your house in Gladys: nothing to enter, no account, no key. Forecasts and observations for the whole of Europe (MOSMIX, about 4,300 stations); the official warnings, the pollen and UV indices and the radar for Germany. Open data of the DWD (GeoNutzungsverordnung); this is an unofficial connector, not affiliated with the DWD.",
-        "fr": "Les prévisions du service météorologique national allemand (DWD) pour la position de votre maison dans Gladys : rien à saisir, ni compte ni clé. Prévisions et observations pour toute l’Europe (MOSMIX, environ 4 300 stations) ; avertissements officiels, indices pollinique et UV et radar pour l’Allemagne. Données ouvertes du DWD (GeoNutzungsverordnung) ; connecteur non officiel, non affilié au DWD."
+        "fr": "Les prévisions du service météorologique national allemand (DWD) pour la position de votre maison dans Gladys : rien à saisir, ni compte ni clé. Prévisions et observations pour toute l’Europe (MOSMIX, environ 4 300 stations) ; avertissements officiels, indices pollinique et UV et radar pour l’Allemagne. Données ouvertes du DWD (GeoNutzungsverordnung) ; connecteur non officiel, non affilié au DWD.",
+        "de": "Die Vorhersagen des Deutschen Wetterdienstes (DWD) für den Standort deines Zuhauses in Gladys: nichts einzugeben, kein Konto, kein Schlüssel. Vorhersagen und Beobachtungen für ganz Europa (MOSMIX, etwa 4.300 Stationen); amtliche Warnungen, Pollen- und UV-Index und Regenradar für Deutschland. Open Data des DWD (GeoNutzungsverordnung); inoffizielle Anbindung, nicht mit dem DWD verbunden."
       },
       "links": [
         {
           "url": "https://www.dwd.de/EN/weather/weather_climate_local/_node.html",
           "label": {
             "en": "DWD weather",
-            "fr": "Météo du DWD"
+            "fr": "Météo du DWD",
+            "de": "DWD-Wetter"
           }
         },
         {
           "url": "https://www.dwd.de/DE/leistungen/opendata/opendata.html",
           "label": {
             "en": "DWD open data",
-            "fr": "Données ouvertes du DWD"
+            "fr": "Données ouvertes du DWD",
+            "de": "DWD Open Data"
           }
         }
       ]
@@ -47,24 +52,48 @@
       "type": "boolean",
       "label": {
         "en": "Official warnings",
-        "fr": "Avertissements officiels"
+        "fr": "Avertissements officiels",
+        "de": "Amtliche Warnungen"
       },
       "description": {
-        "en": "The DWD warnings in force for your house (wind, thunderstorms, rain, snow, frost, black ice, fog, heat…), in German with a translated title. They feed the weather widget and the core “weather alert” scene trigger. Germany only.",
-        "fr": "Les avertissements du DWD en cours pour votre maison (vent, orages, pluie, neige, gel, verglas, brouillard, chaleur…), en allemand avec un titre traduit. Ils alimentent le widget météo et le déclencheur de scène « alerte météo ». Allemagne seulement."
+        "en": "The DWD warnings in force for your house (wind, thunderstorms, rain, snow, frost, black ice, fog, heat…), in German with a translated title. They feed the weather widget, the core “weather alert” scene trigger and the “warning issued / ended” triggers. Germany only.",
+        "fr": "Les avertissements du DWD en cours pour votre maison (vent, orages, pluie, neige, gel, verglas, brouillard, chaleur…), en allemand avec un titre traduit. Ils alimentent le widget météo, le déclencheur « alerte météo » du cœur et les déclencheurs « avertissement émis / levé ». Allemagne seulement.",
+        "de": "Die aktiven DWD-Warnungen für dein Zuhause (Wind, Gewitter, Regen, Schnee, Frost, Glätte, Nebel, Hitze …). Sie erscheinen im Wetter-Widget, im Szenenauslöser „Wetterwarnung“ von Gladys und in den Auslösern „Warnung ausgegeben / aufgehoben“. Nur Deutschland."
       },
       "default": true
+    },
+    {
+      "key": "warncell_ids",
+      "type": "string",
+      "label": {
+        "en": "Additional warn cells",
+        "fr": "Cellules d’alerte supplémentaires",
+        "de": "Zusätzliche Warnzellen"
+      },
+      "description": {
+        "en": "DWD warn cell ids (9 digits), separated by commas: a municipality or a whole district, for a holiday home or your parents’ town. The “Find a warn cell” button gives them. Their warnings feed the widget, the triggers and the scene action, not the weather of the houses.",
+        "fr": "Identifiants de cellules d’alerte du DWD (9 chiffres), séparés par des virgules : une commune ou un district entier, pour une maison de vacances ou la ville des parents. Le bouton « Trouver une cellule d’alerte » les donne. Leurs avertissements alimentent le widget, les déclencheurs et l’action de scène, pas la météo des maisons.",
+        "de": "Warnzellen-IDs des DWD (9 Ziffern), durch Kommas getrennt: eine Gemeinde oder ein ganzer Landkreis, etwa für das Ferienhaus oder den Wohnort der Eltern. Der Knopf „Warnzelle suchen“ liefert sie. Ihre Warnungen speisen Widget, Auslöser und Szenenaktion, nicht das Wetter der Häuser."
+      },
+      "placeholder": {
+        "en": "e.g. 809180117, 103359000",
+        "fr": "ex. 809180117, 103359000",
+        "de": "z. B. 809180117, 103359000"
+      },
+      "default": ""
     },
     {
       "key": "pollen_alerts",
       "type": "boolean",
       "label": {
         "en": "Pollen alerts",
-        "fr": "Alertes pollens"
+        "fr": "Alertes pollens",
+        "de": "Pollenwarnungen"
       },
       "description": {
         "en": "Adds an alert when the DWD pollen index of your region reaches a moderate exposure. Not an official warning: it comes from the index itself. Germany only.",
-        "fr": "Ajoute une alerte quand l’indice pollinique du DWD de votre région atteint une exposition moyenne. Ce n’est pas un avertissement officiel : elle découle de l’indice. Allemagne seulement."
+        "fr": "Ajoute une alerte quand l’indice pollinique du DWD de votre région atteint une exposition moyenne. Ce n’est pas un avertissement officiel : elle découle de l’indice. Allemagne seulement.",
+        "de": "Fügt eine Warnung hinzu, wenn der Pollenindex des DWD für deine Region eine mittlere Belastung erreicht. Keine amtliche Warnung: sie folgt aus dem Index selbst. Nur Deutschland."
       },
       "default": false
     },
@@ -73,11 +102,13 @@
       "type": "boolean",
       "label": {
         "en": "Precipitation radar",
-        "fr": "Radar de précipitations"
+        "fr": "Radar de précipitations",
+        "de": "Regenradar"
       },
       "description": {
         "en": "DWD radar around your house, shown in the weather widget when its “provider images” option is on. Germany and its borders.",
-        "fr": "Radar du DWD autour de votre maison, affiché par le widget météo quand son option « images du fournisseur » est activée. Allemagne et ses frontières."
+        "fr": "Radar du DWD autour de votre maison, affiché par le widget météo quand son option « images du fournisseur » est activée. Allemagne et ses frontières.",
+        "de": "DWD-Radar rund um dein Zuhause, im Wetter-Widget sichtbar, wenn dort „Bilder des Anbieters“ eingeschaltet ist. Deutschland und Grenzgebiete."
       },
       "default": true
     },
@@ -86,15 +117,18 @@
       "type": "string",
       "label": {
         "en": "Forecast station (advanced)",
-        "fr": "Station de prévision (avancé)"
+        "fr": "Station de prévision (avancé)",
+        "de": "Vorhersagestation (erweitert)"
       },
       "description": {
         "en": "Empty: the nearest MOSMIX station is used. To force another one, its id from the DWD station catalog (e.g. 10384 for Berlin-Tempelhof).",
-        "fr": "Vide : la station MOSMIX la plus proche est utilisée. Pour en forcer une autre, son identifiant du catalogue de stations du DWD (ex. 10384 pour Berlin-Tempelhof)."
+        "fr": "Vide : la station MOSMIX la plus proche est utilisée. Pour en forcer une autre, son identifiant du catalogue de stations du DWD (ex. 10384 pour Berlin-Tempelhof).",
+        "de": "Leer: die nächste MOSMIX-Station wird genutzt. Für eine andere ihre ID aus dem Stationskatalog des DWD (z. B. 10384 für Berlin-Tempelhof)."
       },
       "placeholder": {
         "en": "e.g. 10384",
-        "fr": "ex. 10384"
+        "fr": "ex. 10384",
+        "de": "z. B. 10384"
       },
       "default": ""
     }
@@ -104,9 +138,46 @@
       "key": "test_sources",
       "label": {
         "en": "Test the DWD sources",
-        "fr": "Tester les sources du DWD"
+        "fr": "Tester les sources du DWD",
+        "de": "DWD-Quellen testen"
       },
-      "timeout_seconds": 30
+      "description": {
+        "en": "Asks each DWD source now for the first house and the typed warn cells, and says what answered.",
+        "fr": "Interroge chaque source du DWD pour la première maison et les cellules saisies, et dit ce qui a répondu.",
+        "de": "Fragt jede DWD-Quelle für das erste Zuhause und die eingetragenen Warnzellen ab und zeigt, was geantwortet hat."
+      },
+      "timeout_seconds": 60
+    },
+    {
+      "key": "find_warncell",
+      "label": {
+        "en": "Find a warn cell",
+        "fr": "Trouver une cellule d’alerte",
+        "de": "Warnzelle suchen"
+      },
+      "description": {
+        "en": "Searches the municipalities of the DWD by name and gives their warn cell ids.",
+        "fr": "Cherche les communes du DWD par leur nom et donne leurs identifiants de cellule d’alerte.",
+        "de": "Sucht die Gemeinden des DWD nach Namen und zeigt ihre Warnzellen-IDs."
+      },
+      "timeout_seconds": 30,
+      "fields": [
+        {
+          "key": "query",
+          "type": "string",
+          "label": {
+            "en": "Municipality",
+            "fr": "Commune",
+            "de": "Gemeinde"
+          },
+          "placeholder": {
+            "en": "e.g. Garmisch",
+            "fr": "ex. Garmisch",
+            "de": "z. B. Garmisch"
+          },
+          "required": true
+        }
+      ]
     }
   ],
   "scene_triggers": [
@@ -114,11 +185,13 @@
       "key": "pollen_level_changed",
       "label": {
         "en": "Pollen level changed",
-        "fr": "Niveau de pollens changé"
+        "fr": "Niveau de pollens changé",
+        "de": "Pollenbelastung geändert"
       },
       "description": {
         "en": "The DWD pollen index of a house reached a new exposure level (the highest pollen of the day).",
-        "fr": "L’indice pollinique du DWD d’une maison a atteint un nouveau niveau d’exposition (le pollen le plus présent du jour)."
+        "fr": "L’indice pollinique du DWD d’une maison a atteint un nouveau niveau d’exposition (le pollen le plus présent du jour).",
+        "de": "Der Pollenindex des DWD für ein Zuhause hat eine neue Belastungsstufe erreicht (der stärkste Pollen des Tages)."
       },
       "fields": [
         {
@@ -126,39 +199,45 @@
           "type": "select",
           "label": {
             "en": "Level reached",
-            "fr": "Niveau atteint"
+            "fr": "Niveau atteint",
+            "de": "Erreichte Stufe"
           },
           "description": {
             "en": "Empty: any level. Fires even when the index jumps over this level.",
-            "fr": "Vide : tous les niveaux. Se déclenche même si l’indice saute ce niveau."
+            "fr": "Vide : tous les niveaux. Se déclenche même si l’indice saute ce niveau.",
+            "de": "Leer: jede Stufe. Löst auch aus, wenn der Index diese Stufe überspringt."
           },
           "options": [
             {
               "value": "none",
               "label": {
                 "en": "None (0)",
-                "fr": "Aucune (0)"
+                "fr": "Aucune (0)",
+                "de": "Keine (0)"
               }
             },
             {
               "value": "low",
               "label": {
                 "en": "Low (1)",
-                "fr": "Faible (1)"
+                "fr": "Faible (1)",
+                "de": "Gering (1)"
               }
             },
             {
               "value": "moderate",
               "label": {
                 "en": "Moderate (2)",
-                "fr": "Moyenne (2)"
+                "fr": "Moyenne (2)",
+                "de": "Mittel (2)"
               }
             },
             {
               "value": "high",
               "label": {
                 "en": "High (3)",
-                "fr": "Forte (3)"
+                "fr": "Forte (3)",
+                "de": "Hoch (3)"
               }
             }
           ]
@@ -168,21 +247,24 @@
           "type": "select",
           "label": {
             "en": "Direction",
-            "fr": "Sens"
+            "fr": "Sens",
+            "de": "Richtung"
           },
           "options": [
             {
               "value": "worsening",
               "label": {
                 "en": "Getting worse",
-                "fr": "Aggravation"
+                "fr": "Aggravation",
+                "de": "Verschlechterung"
               }
             },
             {
               "value": "improving",
               "label": {
                 "en": "Getting better",
-                "fr": "Amélioration"
+                "fr": "Amélioration",
+                "de": "Besserung"
               }
             }
           ]
@@ -192,15 +274,18 @@
           "type": "string",
           "label": {
             "en": "House",
-            "fr": "Maison"
+            "fr": "Maison",
+            "de": "Zuhause"
           },
           "description": {
             "en": "Exact name of the house in Gladys. Empty: every house.",
-            "fr": "Nom exact de la maison dans Gladys. Vide : toutes les maisons."
+            "fr": "Nom exact de la maison dans Gladys. Vide : toutes les maisons.",
+            "de": "Genauer Name des Zuhauses in Gladys. Leer: jedes Zuhause."
           },
           "placeholder": {
             "en": "e.g. Home",
-            "fr": "ex. Maison"
+            "fr": "ex. Maison",
+            "de": "z. B. Zuhause"
           }
         }
       ],
@@ -210,7 +295,8 @@
           "type": "string",
           "label": {
             "en": "Level reached",
-            "fr": "Niveau atteint"
+            "fr": "Niveau atteint",
+            "de": "Erreichte Stufe"
           }
         },
         {
@@ -218,7 +304,8 @@
           "type": "string",
           "label": {
             "en": "Direction",
-            "fr": "Sens"
+            "fr": "Sens",
+            "de": "Richtung"
           }
         },
         {
@@ -226,7 +313,8 @@
           "type": "string",
           "label": {
             "en": "Previous level",
-            "fr": "Niveau précédent"
+            "fr": "Niveau précédent",
+            "de": "Vorherige Stufe"
           }
         },
         {
@@ -234,7 +322,8 @@
           "type": "string",
           "label": {
             "en": "Current level",
-            "fr": "Niveau actuel"
+            "fr": "Niveau actuel",
+            "de": "Aktuelle Stufe"
           }
         },
         {
@@ -242,7 +331,8 @@
           "type": "number",
           "label": {
             "en": "Index (0 to 3)",
-            "fr": "Indice (0 à 3)"
+            "fr": "Indice (0 à 3)",
+            "de": "Index (0 bis 3)"
           }
         },
         {
@@ -250,7 +340,8 @@
           "type": "string",
           "label": {
             "en": "Pollen at that level",
-            "fr": "Pollens à ce niveau"
+            "fr": "Pollens à ce niveau",
+            "de": "Pollen auf dieser Stufe"
           }
         },
         {
@@ -258,7 +349,8 @@
           "type": "string",
           "label": {
             "en": "Pollen region",
-            "fr": "Région pollinique"
+            "fr": "Région pollinique",
+            "de": "Pollenregion"
           }
         },
         {
@@ -266,7 +358,8 @@
           "type": "string",
           "label": {
             "en": "House",
-            "fr": "Maison"
+            "fr": "Maison",
+            "de": "Zuhause"
           }
         },
         {
@@ -274,7 +367,561 @@
           "type": "string",
           "label": {
             "en": "Summary",
-            "fr": "Résumé"
+            "fr": "Résumé",
+            "de": "Zusammenfassung"
+          }
+        }
+      ]
+    },
+    {
+      "key": "warning_issued",
+      "label": {
+        "en": "DWD warning issued",
+        "fr": "Avertissement DWD émis",
+        "de": "DWD-Warnung ausgegeben"
+      },
+      "description": {
+        "en": "The DWD issued a warning for an area, raised its level, or turned an advance notice into a warning.",
+        "fr": "Le DWD a émis un avertissement pour une zone, relevé son niveau, ou transformé un préavis en avertissement.",
+        "de": "Der DWD hat eine Warnung für ein Gebiet ausgegeben, ihre Stufe erhöht oder eine Vorabinformation zur Warnung gemacht."
+      },
+      "fields": [
+        {
+          "key": "area",
+          "type": "string",
+          "label": {
+            "en": "Area",
+            "fr": "Zone",
+            "de": "Gebiet"
+          },
+          "description": {
+            "en": "Exact name of the house in Gladys, or a warn cell id. Empty: every area followed.",
+            "fr": "Nom exact de la maison dans Gladys, ou identifiant d’une cellule d’alerte. Vide : toutes les zones suivies.",
+            "de": "Genauer Name des Zuhauses in Gladys oder eine Warnzellen-ID. Leer: alle beobachteten Gebiete."
+          },
+          "placeholder": {
+            "en": "e.g. Home",
+            "fr": "ex. Maison",
+            "de": "z. B. Zuhause"
+          }
+        },
+        {
+          "key": "level",
+          "type": "multi_select",
+          "label": {
+            "en": "Levels",
+            "fr": "Niveaux",
+            "de": "Stufen"
+          },
+          "description": {
+            "en": "Tick 3 and 4 for severe weather only. Empty: every level.",
+            "fr": "Cochez 3 et 4 pour les seules fortes intempéries. Vide : tous les niveaux.",
+            "de": "Kreuze 3 und 4 nur für Unwetter an. Leer: alle Stufen."
+          },
+          "options": [
+            {
+              "value": "1",
+              "label": {
+                "en": "1 – Weather warning",
+                "fr": "1 – Avertissement",
+                "de": "1 – Wetterwarnung"
+              }
+            },
+            {
+              "value": "2",
+              "label": {
+                "en": "2 – Significant weather",
+                "fr": "2 – Temps marquant",
+                "de": "2 – Markantes Wetter"
+              }
+            },
+            {
+              "value": "3",
+              "label": {
+                "en": "3 – Severe weather",
+                "fr": "3 – Fortes intempéries",
+                "de": "3 – Unwetter"
+              }
+            },
+            {
+              "value": "4",
+              "label": {
+                "en": "4 – Extreme weather",
+                "fr": "4 – Intempéries extrêmes",
+                "de": "4 – Extremes Unwetter"
+              }
+            }
+          ]
+        },
+        {
+          "key": "type",
+          "type": "multi_select",
+          "label": {
+            "en": "Warning types",
+            "fr": "Types d’avertissement",
+            "de": "Warnarten"
+          },
+          "description": {
+            "en": "Empty: every type.",
+            "fr": "Vide : tous les types.",
+            "de": "Leer: alle Arten."
+          },
+          "options": [
+            {
+              "value": "thunderstorm",
+              "label": {
+                "en": "Thunderstorms",
+                "fr": "Orages",
+                "de": "Gewitter"
+              }
+            },
+            {
+              "value": "wind",
+              "label": {
+                "en": "Wind",
+                "fr": "Vent",
+                "de": "Wind"
+              }
+            },
+            {
+              "value": "rain",
+              "label": {
+                "en": "Rain",
+                "fr": "Pluie",
+                "de": "Regen"
+              }
+            },
+            {
+              "value": "snow",
+              "label": {
+                "en": "Snow",
+                "fr": "Neige",
+                "de": "Schnee"
+              }
+            },
+            {
+              "value": "frost",
+              "label": {
+                "en": "Frost",
+                "fr": "Gel",
+                "de": "Frost"
+              }
+            },
+            {
+              "value": "ice",
+              "label": {
+                "en": "Ice",
+                "fr": "Verglas",
+                "de": "Glätte"
+              }
+            },
+            {
+              "value": "thaw",
+              "label": {
+                "en": "Thaw",
+                "fr": "Dégel",
+                "de": "Tauwetter"
+              }
+            },
+            {
+              "value": "fog",
+              "label": {
+                "en": "Fog",
+                "fr": "Brouillard",
+                "de": "Nebel"
+              }
+            },
+            {
+              "value": "heat",
+              "label": {
+                "en": "Heat",
+                "fr": "Chaleur",
+                "de": "Hitze"
+              }
+            },
+            {
+              "value": "uv",
+              "label": {
+                "en": "High UV index",
+                "fr": "Indice UV élevé",
+                "de": "Hoher UV-Index"
+              }
+            },
+            {
+              "value": "other",
+              "label": {
+                "en": "Other",
+                "fr": "Autre",
+                "de": "Sonstiges"
+              }
+            }
+          ]
+        }
+      ],
+      "variables": [
+        {
+          "key": "area",
+          "type": "string",
+          "label": {
+            "en": "Area",
+            "fr": "Zone",
+            "de": "Gebiet"
+          }
+        },
+        {
+          "key": "area_name",
+          "type": "string",
+          "label": {
+            "en": "Area name",
+            "fr": "Nom de la zone",
+            "de": "Name des Gebiets"
+          }
+        },
+        {
+          "key": "type",
+          "type": "string",
+          "label": {
+            "en": "Type (filter value)",
+            "fr": "Type (valeur du filtre)",
+            "de": "Art (Filterwert)"
+          }
+        },
+        {
+          "key": "type_name",
+          "type": "string",
+          "label": {
+            "en": "Type",
+            "fr": "Type",
+            "de": "Art"
+          }
+        },
+        {
+          "key": "level",
+          "type": "number",
+          "label": {
+            "en": "Level (1 to 4)",
+            "fr": "Niveau (1 à 4)",
+            "de": "Stufe (1 bis 4)"
+          }
+        },
+        {
+          "key": "level_name",
+          "type": "string",
+          "label": {
+            "en": "Level name",
+            "fr": "Nom du niveau",
+            "de": "Name der Stufe"
+          }
+        },
+        {
+          "key": "title",
+          "type": "string",
+          "label": {
+            "en": "Title",
+            "fr": "Titre",
+            "de": "Titel"
+          }
+        },
+        {
+          "key": "house",
+          "type": "string",
+          "label": {
+            "en": "House",
+            "fr": "Maison",
+            "de": "Zuhause"
+          }
+        },
+        {
+          "key": "start",
+          "type": "string",
+          "label": {
+            "en": "Start",
+            "fr": "Début",
+            "de": "Beginn"
+          }
+        },
+        {
+          "key": "end",
+          "type": "string",
+          "label": {
+            "en": "End",
+            "fr": "Fin",
+            "de": "Ende"
+          }
+        },
+        {
+          "key": "start_iso",
+          "type": "string",
+          "label": {
+            "en": "Start (ISO date)",
+            "fr": "Début (date ISO)",
+            "de": "Beginn (ISO-Datum)"
+          }
+        },
+        {
+          "key": "end_iso",
+          "type": "string",
+          "label": {
+            "en": "End (ISO date)",
+            "fr": "Fin (date ISO)",
+            "de": "Ende (ISO-Datum)"
+          }
+        },
+        {
+          "key": "in_force",
+          "type": "boolean",
+          "label": {
+            "en": "In force now",
+            "fr": "En cours maintenant",
+            "de": "Jetzt aktiv"
+          }
+        },
+        {
+          "key": "watch",
+          "type": "boolean",
+          "label": {
+            "en": "Advance notice",
+            "fr": "Préavis",
+            "de": "Vorabinformation"
+          }
+        },
+        {
+          "key": "description",
+          "type": "string",
+          "label": {
+            "en": "Description (German)",
+            "fr": "Description (allemand)",
+            "de": "Beschreibung"
+          }
+        },
+        {
+          "key": "instruction",
+          "type": "string",
+          "label": {
+            "en": "Advice (German)",
+            "fr": "Consignes (allemand)",
+            "de": "Verhaltenshinweise"
+          }
+        },
+        {
+          "key": "summary",
+          "type": "string",
+          "label": {
+            "en": "Summary",
+            "fr": "Résumé",
+            "de": "Zusammenfassung"
+          }
+        }
+      ]
+    },
+    {
+      "key": "warning_ended",
+      "label": {
+        "en": "DWD warning ended",
+        "fr": "Avertissement DWD levé",
+        "de": "DWD-Warnung aufgehoben"
+      },
+      "description": {
+        "en": "No DWD warning of a type remains for an area (its end time passed and the DWD did not extend it).",
+        "fr": "Plus aucun avertissement du DWD d’un type pour une zone (son heure de fin est passée et le DWD ne l’a pas prolongé).",
+        "de": "Für ein Gebiet besteht keine DWD-Warnung einer Art mehr (ihr Ende ist vorbei und der DWD hat sie nicht verlängert)."
+      },
+      "fields": [
+        {
+          "key": "area",
+          "type": "string",
+          "label": {
+            "en": "Area",
+            "fr": "Zone",
+            "de": "Gebiet"
+          },
+          "description": {
+            "en": "Exact name of the house in Gladys, or a warn cell id. Empty: every area followed.",
+            "fr": "Nom exact de la maison dans Gladys, ou identifiant d’une cellule d’alerte. Vide : toutes les zones suivies.",
+            "de": "Genauer Name des Zuhauses in Gladys oder eine Warnzellen-ID. Leer: alle beobachteten Gebiete."
+          },
+          "placeholder": {
+            "en": "e.g. Home",
+            "fr": "ex. Maison",
+            "de": "z. B. Zuhause"
+          }
+        },
+        {
+          "key": "type",
+          "type": "multi_select",
+          "label": {
+            "en": "Warning types",
+            "fr": "Types d’avertissement",
+            "de": "Warnarten"
+          },
+          "description": {
+            "en": "Empty: every type.",
+            "fr": "Vide : tous les types.",
+            "de": "Leer: alle Arten."
+          },
+          "options": [
+            {
+              "value": "thunderstorm",
+              "label": {
+                "en": "Thunderstorms",
+                "fr": "Orages",
+                "de": "Gewitter"
+              }
+            },
+            {
+              "value": "wind",
+              "label": {
+                "en": "Wind",
+                "fr": "Vent",
+                "de": "Wind"
+              }
+            },
+            {
+              "value": "rain",
+              "label": {
+                "en": "Rain",
+                "fr": "Pluie",
+                "de": "Regen"
+              }
+            },
+            {
+              "value": "snow",
+              "label": {
+                "en": "Snow",
+                "fr": "Neige",
+                "de": "Schnee"
+              }
+            },
+            {
+              "value": "frost",
+              "label": {
+                "en": "Frost",
+                "fr": "Gel",
+                "de": "Frost"
+              }
+            },
+            {
+              "value": "ice",
+              "label": {
+                "en": "Ice",
+                "fr": "Verglas",
+                "de": "Glätte"
+              }
+            },
+            {
+              "value": "thaw",
+              "label": {
+                "en": "Thaw",
+                "fr": "Dégel",
+                "de": "Tauwetter"
+              }
+            },
+            {
+              "value": "fog",
+              "label": {
+                "en": "Fog",
+                "fr": "Brouillard",
+                "de": "Nebel"
+              }
+            },
+            {
+              "value": "heat",
+              "label": {
+                "en": "Heat",
+                "fr": "Chaleur",
+                "de": "Hitze"
+              }
+            },
+            {
+              "value": "uv",
+              "label": {
+                "en": "High UV index",
+                "fr": "Indice UV élevé",
+                "de": "Hoher UV-Index"
+              }
+            },
+            {
+              "value": "other",
+              "label": {
+                "en": "Other",
+                "fr": "Autre",
+                "de": "Sonstiges"
+              }
+            }
+          ]
+        }
+      ],
+      "variables": [
+        {
+          "key": "area",
+          "type": "string",
+          "label": {
+            "en": "Area",
+            "fr": "Zone",
+            "de": "Gebiet"
+          }
+        },
+        {
+          "key": "area_name",
+          "type": "string",
+          "label": {
+            "en": "Area name",
+            "fr": "Nom de la zone",
+            "de": "Name des Gebiets"
+          }
+        },
+        {
+          "key": "type",
+          "type": "string",
+          "label": {
+            "en": "Type (filter value)",
+            "fr": "Type (valeur du filtre)",
+            "de": "Art (Filterwert)"
+          }
+        },
+        {
+          "key": "type_name",
+          "type": "string",
+          "label": {
+            "en": "Type",
+            "fr": "Type",
+            "de": "Art"
+          }
+        },
+        {
+          "key": "level",
+          "type": "number",
+          "label": {
+            "en": "Level (1 to 4)",
+            "fr": "Niveau (1 à 4)",
+            "de": "Stufe (1 bis 4)"
+          }
+        },
+        {
+          "key": "level_name",
+          "type": "string",
+          "label": {
+            "en": "Level name",
+            "fr": "Nom du niveau",
+            "de": "Name der Stufe"
+          }
+        },
+        {
+          "key": "title",
+          "type": "string",
+          "label": {
+            "en": "Title",
+            "fr": "Titre",
+            "de": "Titel"
+          }
+        },
+        {
+          "key": "house",
+          "type": "string",
+          "label": {
+            "en": "House",
+            "fr": "Maison",
+            "de": "Zuhause"
           }
         }
       ]
@@ -285,11 +932,13 @@
       "key": "warnings",
       "label": {
         "en": "DWD warnings",
-        "fr": "Avertissements DWD"
+        "fr": "Avertissements DWD",
+        "de": "DWD-Warnungen"
       },
       "description": {
-        "en": "The official warnings in force at the house: severity, period, description and advice.",
-        "fr": "Les avertissements officiels en cours pour la maison : sévérité, période, description, conseils."
+        "en": "Levels now and later, the warnings in force with period, badge and the official text.",
+        "fr": "Niveaux actuel et à venir, les avertissements en cours avec période, badge et texte officiel.",
+        "de": "Stufen jetzt und später, die aktiven Warnungen mit Zeitraum, Badge und amtlichem Text."
       },
       "icon": "alert-triangle",
       "settings": [
@@ -297,16 +946,19 @@
           "key": "house",
           "type": "string",
           "label": {
-            "en": "House",
-            "fr": "Maison"
+            "en": "House or warn cell",
+            "fr": "Maison ou cellule d’alerte",
+            "de": "Zuhause oder Warnzelle"
           },
           "description": {
-            "en": "Name of the house in Gladys. Empty: the first located house.",
-            "fr": "Nom de la maison dans Gladys. Vide : la première maison localisée."
+            "en": "Name of the house in Gladys, or a warn cell id of the configuration. Empty: the first area.",
+            "fr": "Nom de la maison dans Gladys, ou identifiant d’une cellule d’alerte de la configuration. Vide : la première zone.",
+            "de": "Name des Zuhauses in Gladys oder eine Warnzellen-ID aus der Konfiguration. Leer: das erste Gebiet."
           },
           "placeholder": {
             "en": "e.g. Home",
-            "fr": "ex. Maison"
+            "fr": "ex. Maison",
+            "de": "z. B. Zuhause"
           }
         }
       ]
@@ -315,11 +967,13 @@
       "key": "pollen",
       "label": {
         "en": "Pollen",
-        "fr": "Pollens"
+        "fr": "Pollens",
+        "de": "Pollen"
       },
       "description": {
         "en": "DWD pollen index today, tomorrow and the day after, pollen by pollen, with advice.",
-        "fr": "Indice pollinique du DWD aujourd’hui, demain et après-demain, pollen par pollen, avec conseils."
+        "fr": "Indice pollinique du DWD aujourd’hui, demain et après-demain, pollen par pollen, avec conseils.",
+        "de": "Pollenindex des DWD heute, morgen und übermorgen, Pollen für Pollen, mit Hinweisen."
       },
       "icon": "feather",
       "settings": [
@@ -328,15 +982,111 @@
           "type": "string",
           "label": {
             "en": "House",
-            "fr": "Maison"
+            "fr": "Maison",
+            "de": "Zuhause"
           },
           "description": {
             "en": "Name of the house in Gladys. Empty: the first located house.",
-            "fr": "Nom de la maison dans Gladys. Vide : la première maison localisée."
+            "fr": "Nom de la maison dans Gladys. Vide : la première maison localisée.",
+            "de": "Name des Zuhauses in Gladys. Leer: das erste Zuhause mit Standort."
           },
           "placeholder": {
             "en": "e.g. Home",
-            "fr": "ex. Maison"
+            "fr": "ex. Maison",
+            "de": "z. B. Zuhause"
+          }
+        }
+      ]
+    }
+  ],
+  "scene_actions": [
+    {
+      "key": "get_warnings",
+      "label": {
+        "en": "Current DWD warnings",
+        "fr": "Avertissements DWD en cours",
+        "de": "Aktuelle DWD-Warnungen"
+      },
+      "description": {
+        "en": "A summary of the warnings in force and announced, ready to send in a message, and their levels.",
+        "fr": "Un résumé des avertissements en cours et annoncés, prêt à envoyer dans un message, et leurs niveaux.",
+        "de": "Eine Zusammenfassung der aktiven und angekündigten Warnungen, fertig für eine Nachricht, und ihre Stufen."
+      },
+      "timeout_seconds": 15,
+      "fields": [
+        {
+          "key": "area",
+          "type": "string",
+          "label": {
+            "en": "Area",
+            "fr": "Zone",
+            "de": "Gebiet"
+          },
+          "description": {
+            "en": "Exact name of the house in Gladys, or a warn cell id. Empty: every area followed.",
+            "fr": "Nom exact de la maison dans Gladys, ou identifiant d’une cellule d’alerte. Vide : toutes les zones suivies.",
+            "de": "Genauer Name des Zuhauses in Gladys oder eine Warnzellen-ID. Leer: alle beobachteten Gebiete."
+          },
+          "placeholder": {
+            "en": "e.g. Home",
+            "fr": "ex. Maison",
+            "de": "z. B. Zuhause"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "key": "summary",
+          "type": "string",
+          "label": {
+            "en": "Summary",
+            "fr": "Résumé",
+            "de": "Zusammenfassung"
+          }
+        },
+        {
+          "key": "count",
+          "type": "number",
+          "label": {
+            "en": "Number of warnings",
+            "fr": "Nombre d’avertissements",
+            "de": "Anzahl der Warnungen"
+          }
+        },
+        {
+          "key": "current_level",
+          "type": "number",
+          "label": {
+            "en": "Current level",
+            "fr": "Niveau actuel",
+            "de": "Aktuelle Stufe"
+          }
+        },
+        {
+          "key": "upcoming_level",
+          "type": "number",
+          "label": {
+            "en": "Upcoming level",
+            "fr": "Niveau à venir",
+            "de": "Kommende Stufe"
+          }
+        },
+        {
+          "key": "current_level_name",
+          "type": "string",
+          "label": {
+            "en": "Current level name",
+            "fr": "Nom du niveau actuel",
+            "de": "Name der aktuellen Stufe"
+          }
+        },
+        {
+          "key": "upcoming_level_name",
+          "type": "string",
+          "label": {
+            "en": "Upcoming level name",
+            "fr": "Nom du niveau à venir",
+            "de": "Name der kommenden Stufe"
           }
         }
       ]
