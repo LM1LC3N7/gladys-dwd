@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-13
+
 ### Added
 
 - Scene triggers "DWD warning issued" and "DWD warning ended", filterable by
@@ -45,5 +47,6 @@ the notes of the version's GitHub Release.
 - "Test the DWD sources" button in the configuration screen; optional
   forecast station override.
 
-[Unreleased]: https://github.com/LM1LC3N7/gladys-dwd/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/LM1LC3N7/gladys-dwd/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/LM1LC3N7/gladys-dwd/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/LM1LC3N7/gladys-dwd/releases/tag/v1.0.0
