@@ -1,0 +1,15 @@
+gladys-dwd
+Copyright (c) 2026 LM1LC3N7
+
+Weather data: Deutscher Wetterdienst (DWD), open data under the German
+GeoNutzungsverordnung (GeoNutzV). Attribution: "Datenbasis: Deutscher
+Wetterdienst". The MOSMIX forecasts, the hourly observations, the warnings,
+the pollen and UV indices and the radar composite are published unchanged
+or converted in units; the warning titles are translated by this
+integration.
+
+Country borders of the radar image: GeoBasis-DE / BKG (Bundesamt für
+Kartographie und Geodäsie), served by the DWD GeoServer.
+
+This integration is not affiliated with nor endorsed by the Deutscher
+Wetterdienst. It never uses the DWD logo.

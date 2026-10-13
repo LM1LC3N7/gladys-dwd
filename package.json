@@ -1,0 +1,36 @@
+{
+  "name": "gladys-dwd",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Deutscher Wetterdienst (DWD) weather provider for Gladys Assistant: MOSMIX forecasts, hourly observations, official warnings, pollen and UV index, radar.",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "node --test",
+    "audit": "npm audit --omit=dev",
+    "update-stations": "node scripts/update-stations.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LM1LC3N7/gladys-dwd.git"
+  },
+  "dependencies": {
+    "@gladysassistant/integration-sdk": "^0.15.0",
+    "pngjs": "^7.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.12.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.13.0",
+    "prettier": "^3.9.10"
+  },
+  "license": "Apache-2.0"
+}

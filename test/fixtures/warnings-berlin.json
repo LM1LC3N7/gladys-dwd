@@ -1,0 +1,79 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "Warnungen_Gemeinden.1",
+      "geometry": null,
+      "properties": {
+        "IDENTIFIER": "2.49.0.0.276.0.DWD.PVW.1791835440000.5abb7667-cbed-4010-9c9c-8f3ac9209900.DEU",
+        "NAME": "Gemeinde Berlin",
+        "WARNCELLID": 811000000,
+        "MSGTYPE": "Alert",
+        "EVENT": "STURMBÖEN",
+        "EC_II": "52",
+        "EC_GROUP": "WIND",
+        "SEVERITY": "Moderate",
+        "URGENCY": "Immediate",
+        "ONSET": "2026-10-13T12:00:00Z",
+        "EXPIRES": "2026-10-13T22:00:00Z",
+        "HEADLINE": "Amtliche WARNUNG vor STURMBÖEN",
+        "DESCRIPTION": "Es treten Sturmböen mit Geschwindigkeiten bis 65 km/h (18 m/s, 35 kn, Bft 8) anfangs aus südlicher, später aus nordwestlicher Richtung auf. In Schauernähe sowie in exponierten Lagen muss mit Sturmböen bis 75 km/h (21 m/s, 41 kn, Bft 9) gerechnet werden.",
+        "INSTRUCTION": "Gefahr durch: einzelne herabstürzende Äste; umherfliegende Gegenstände. \nHandlungsempfehlungen: \nfrei stehende Objekte sichern (z.B. Leinwände und Möbel); z.B. Zelte und Abdeckungen befestigen; im Freien auf herabfallende Gegenstände (z.B. Äste) achten",
+        "ALTITUDE": 0,
+        "CEILING": 9842.5197
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "Warnungen_Gemeinden.2",
+      "geometry": null,
+      "properties": {
+        "IDENTIFIER": "2.49.0.0.276.0.DWD.PVW.1791835440000.frost-test.DEU",
+        "NAME": "Gemeinde Berlin",
+        "WARNCELLID": 811000000,
+        "MSGTYPE": "Alert",
+        "EVENT": "FROST",
+        "EC_II": "22",
+        "EC_GROUP": "FROST",
+        "SEVERITY": "Minor",
+        "URGENCY": "Immediate",
+        "ONSET": "2026-10-13T18:00:00Z",
+        "EXPIRES": "2026-10-14T07:00:00Z",
+        "HEADLINE": "Amtliche WARNUNG vor FROST",
+        "DESCRIPTION": "Es tritt leichter Frost zwischen 0 °C und -2 °C auf.",
+        "INSTRUCTION": "Hinweis auf: mögliche Frostschäden.",
+        "ALTITUDE": 1312.3359,
+        "CEILING": 9842.5197
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "Warnungen_Gemeinden.3",
+      "geometry": null,
+      "properties": {
+        "IDENTIFIER": "2.49.0.0.276.0.DWD.PVW.1791835440000.expired.DEU",
+        "NAME": "Gemeinde Berlin",
+        "WARNCELLID": 811000000,
+        "MSGTYPE": "Alert",
+        "EVENT": "NEBEL",
+        "EC_II": "59",
+        "EC_GROUP": "FOG",
+        "SEVERITY": "Minor",
+        "URGENCY": "Immediate",
+        "ONSET": "2026-10-12T20:00:00Z",
+        "EXPIRES": "2026-10-13T01:00:00Z",
+        "HEADLINE": "Amtliche WARNUNG vor FROST",
+        "DESCRIPTION": "Es tritt leichter Frost zwischen 0 °C und -2 °C auf.",
+        "INSTRUCTION": "Hinweis auf: mögliche Frostschäden.",
+        "ALTITUDE": 0,
+        "CEILING": 9842.5197
+      }
+    }
+  ],
+  "totalFeatures": 3,
+  "numberMatched": 3,
+  "numberReturned": 3,
+  "timeStamp": "2026-10-13T02:25:56.021Z",
+  "crs": null
+}

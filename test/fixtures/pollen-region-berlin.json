@@ -1,0 +1,17 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "Pollenfluggebiete.24",
+      "geometry": null,
+      "properties": { "ID": 24, "GF": 50, "GEN": "Brandenburg und Berlin" },
+      "bbox": [51.3607, 11.2682, 53.558, 14.7647]
+    }
+  ],
+  "totalFeatures": 1,
+  "numberMatched": 1,
+  "numberReturned": 1,
+  "timeStamp": "2026-10-13T02:47:50.350Z",
+  "crs": null
+}

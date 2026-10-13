@@ -1,0 +1,345 @@
+{
+  "manifest_version": 1,
+  "type": "weather",
+  "name": "DWD (Deutscher Wetterdienst)",
+  "description": {
+    "en": "German weather service forecasts, warnings, pollen and UV index, radar. Unofficial.",
+    "fr": "Prévisions du service météo allemand, avertissements, pollens, indice UV, radar. Non officiel."
+  },
+  "version": "0.0.0",
+  "docker_image": "ghcr.io/lm1lc3n7/gladys-dwd:0.0.0",
+  "gladys_version": ">=5.1.0",
+  "cover_image": "https://raw.githubusercontent.com/LM1LC3N7/gladys-dwd/main/cover.png",
+  "categories": ["environment"],
+  "transports": ["cloud"],
+  "location": true,
+  "config_schema": [
+    {
+      "key": "intro",
+      "type": "section",
+      "label": {
+        "en": "Deutscher Wetterdienst weather",
+        "fr": "Météo du Deutscher Wetterdienst"
+      },
+      "description": {
+        "en": "The forecasts of the German national weather service (DWD) for the location of your house in Gladys: nothing to enter, no account, no key. Forecasts and observations for the whole of Europe (MOSMIX, about 4,300 stations); the official warnings, the pollen and UV indices and the radar for Germany. Open data of the DWD (GeoNutzungsverordnung); this is an unofficial connector, not affiliated with the DWD.",
+        "fr": "Les prévisions du service météorologique national allemand (DWD) pour la position de votre maison dans Gladys : rien à saisir, ni compte ni clé. Prévisions et observations pour toute l’Europe (MOSMIX, environ 4 300 stations) ; avertissements officiels, indices pollinique et UV et radar pour l’Allemagne. Données ouvertes du DWD (GeoNutzungsverordnung) ; connecteur non officiel, non affilié au DWD."
+      },
+      "links": [
+        {
+          "url": "https://www.dwd.de/EN/weather/weather_climate_local/_node.html",
+          "label": {
+            "en": "DWD weather",
+            "fr": "Météo du DWD"
+          }
+        },
+        {
+          "url": "https://www.dwd.de/DE/leistungen/opendata/opendata.html",
+          "label": {
+            "en": "DWD open data",
+            "fr": "Données ouvertes du DWD"
+          }
+        }
+      ]
+    },
+    {
+      "key": "official_alerts",
+      "type": "boolean",
+      "label": {
+        "en": "Official warnings",
+        "fr": "Avertissements officiels"
+      },
+      "description": {
+        "en": "The DWD warnings in force for your house (wind, thunderstorms, rain, snow, frost, black ice, fog, heat…), in German with a translated title. They feed the weather widget and the core “weather alert” scene trigger. Germany only.",
+        "fr": "Les avertissements du DWD en cours pour votre maison (vent, orages, pluie, neige, gel, verglas, brouillard, chaleur…), en allemand avec un titre traduit. Ils alimentent le widget météo et le déclencheur de scène « alerte météo ». Allemagne seulement."
+      },
+      "default": true
+    },
+    {
+      "key": "pollen_alerts",
+      "type": "boolean",
+      "label": {
+        "en": "Pollen alerts",
+        "fr": "Alertes pollens"
+      },
+      "description": {
+        "en": "Adds an alert when the DWD pollen index of your region reaches a moderate exposure. Not an official warning: it comes from the index itself. Germany only.",
+        "fr": "Ajoute une alerte quand l’indice pollinique du DWD de votre région atteint une exposition moyenne. Ce n’est pas un avertissement officiel : elle découle de l’indice. Allemagne seulement."
+      },
+      "default": false
+    },
+    {
+      "key": "radar_image",
+      "type": "boolean",
+      "label": {
+        "en": "Precipitation radar",
+        "fr": "Radar de précipitations"
+      },
+      "description": {
+        "en": "DWD radar around your house, shown in the weather widget when its “provider images” option is on. Germany and its borders.",
+        "fr": "Radar du DWD autour de votre maison, affiché par le widget météo quand son option « images du fournisseur » est activée. Allemagne et ses frontières."
+      },
+      "default": true
+    },
+    {
+      "key": "station",
+      "type": "string",
+      "label": {
+        "en": "Forecast station (advanced)",
+        "fr": "Station de prévision (avancé)"
+      },
+      "description": {
+        "en": "Empty: the nearest MOSMIX station is used. To force another one, its id from the DWD station catalog (e.g. 10384 for Berlin-Tempelhof).",
+        "fr": "Vide : la station MOSMIX la plus proche est utilisée. Pour en forcer une autre, son identifiant du catalogue de stations du DWD (ex. 10384 pour Berlin-Tempelhof)."
+      },
+      "placeholder": {
+        "en": "e.g. 10384",
+        "fr": "ex. 10384"
+      },
+      "default": ""
+    }
+  ],
+  "actions": [
+    {
+      "key": "test_sources",
+      "label": {
+        "en": "Test the DWD sources",
+        "fr": "Tester les sources du DWD"
+      },
+      "timeout_seconds": 30
+    }
+  ],
+  "scene_triggers": [
+    {
+      "key": "pollen_level_changed",
+      "label": {
+        "en": "Pollen level changed",
+        "fr": "Niveau de pollens changé"
+      },
+      "description": {
+        "en": "The DWD pollen index of a house reached a new exposure level (the highest pollen of the day).",
+        "fr": "L’indice pollinique du DWD d’une maison a atteint un nouveau niveau d’exposition (le pollen le plus présent du jour)."
+      },
+      "fields": [
+        {
+          "key": "level",
+          "type": "select",
+          "label": {
+            "en": "Level reached",
+            "fr": "Niveau atteint"
+          },
+          "description": {
+            "en": "Empty: any level. Fires even when the index jumps over this level.",
+            "fr": "Vide : tous les niveaux. Se déclenche même si l’indice saute ce niveau."
+          },
+          "options": [
+            {
+              "value": "none",
+              "label": {
+                "en": "None (0)",
+                "fr": "Aucune (0)"
+              }
+            },
+            {
+              "value": "low",
+              "label": {
+                "en": "Low (1)",
+                "fr": "Faible (1)"
+              }
+            },
+            {
+              "value": "moderate",
+              "label": {
+                "en": "Moderate (2)",
+                "fr": "Moyenne (2)"
+              }
+            },
+            {
+              "value": "high",
+              "label": {
+                "en": "High (3)",
+                "fr": "Forte (3)"
+              }
+            }
+          ]
+        },
+        {
+          "key": "direction",
+          "type": "select",
+          "label": {
+            "en": "Direction",
+            "fr": "Sens"
+          },
+          "options": [
+            {
+              "value": "worsening",
+              "label": {
+                "en": "Getting worse",
+                "fr": "Aggravation"
+              }
+            },
+            {
+              "value": "improving",
+              "label": {
+                "en": "Getting better",
+                "fr": "Amélioration"
+              }
+            }
+          ]
+        },
+        {
+          "key": "house",
+          "type": "string",
+          "label": {
+            "en": "House",
+            "fr": "Maison"
+          },
+          "description": {
+            "en": "Exact name of the house in Gladys. Empty: every house.",
+            "fr": "Nom exact de la maison dans Gladys. Vide : toutes les maisons."
+          },
+          "placeholder": {
+            "en": "e.g. Home",
+            "fr": "ex. Maison"
+          }
+        }
+      ],
+      "variables": [
+        {
+          "key": "level",
+          "type": "string",
+          "label": {
+            "en": "Level reached",
+            "fr": "Niveau atteint"
+          }
+        },
+        {
+          "key": "direction",
+          "type": "string",
+          "label": {
+            "en": "Direction",
+            "fr": "Sens"
+          }
+        },
+        {
+          "key": "previous_level",
+          "type": "string",
+          "label": {
+            "en": "Previous level",
+            "fr": "Niveau précédent"
+          }
+        },
+        {
+          "key": "current_level",
+          "type": "string",
+          "label": {
+            "en": "Current level",
+            "fr": "Niveau actuel"
+          }
+        },
+        {
+          "key": "value",
+          "type": "number",
+          "label": {
+            "en": "Index (0 to 3)",
+            "fr": "Indice (0 à 3)"
+          }
+        },
+        {
+          "key": "pollen",
+          "type": "string",
+          "label": {
+            "en": "Pollen at that level",
+            "fr": "Pollens à ce niveau"
+          }
+        },
+        {
+          "key": "region",
+          "type": "string",
+          "label": {
+            "en": "Pollen region",
+            "fr": "Région pollinique"
+          }
+        },
+        {
+          "key": "house",
+          "type": "string",
+          "label": {
+            "en": "House",
+            "fr": "Maison"
+          }
+        },
+        {
+          "key": "summary",
+          "type": "string",
+          "label": {
+            "en": "Summary",
+            "fr": "Résumé"
+          }
+        }
+      ]
+    }
+  ],
+  "widgets": [
+    {
+      "key": "warnings",
+      "label": {
+        "en": "DWD warnings",
+        "fr": "Avertissements DWD"
+      },
+      "description": {
+        "en": "The official warnings in force at the house: severity, period, description and advice.",
+        "fr": "Les avertissements officiels en cours pour la maison : sévérité, période, description, conseils."
+      },
+      "icon": "alert-triangle",
+      "settings": [
+        {
+          "key": "house",
+          "type": "string",
+          "label": {
+            "en": "House",
+            "fr": "Maison"
+          },
+          "description": {
+            "en": "Name of the house in Gladys. Empty: the first located house.",
+            "fr": "Nom de la maison dans Gladys. Vide : la première maison localisée."
+          },
+          "placeholder": {
+            "en": "e.g. Home",
+            "fr": "ex. Maison"
+          }
+        }
+      ]
+    },
+    {
+      "key": "pollen",
+      "label": {
+        "en": "Pollen",
+        "fr": "Pollens"
+      },
+      "description": {
+        "en": "DWD pollen index today, tomorrow and the day after, pollen by pollen, with advice.",
+        "fr": "Indice pollinique du DWD aujourd’hui, demain et après-demain, pollen par pollen, avec conseils."
+      },
+      "icon": "feather",
+      "settings": [
+        {
+          "key": "house",
+          "type": "string",
+          "label": {
+            "en": "House",
+            "fr": "Maison"
+          },
+          "description": {
+            "en": "Name of the house in Gladys. Empty: the first located house.",
+            "fr": "Nom de la maison dans Gladys. Vide : la première maison localisée."
+          },
+          "placeholder": {
+            "en": "e.g. Home",
+            "fr": "ex. Maison"
+          }
+        }
+      ]
+    }
+  ]
+}
