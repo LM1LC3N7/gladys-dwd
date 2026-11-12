@@ -18,7 +18,7 @@ radar cover **Germany**.
 
 ## Installation
 
-1. Install the integration from the Gladys catalog (Gladys 5.2 or newer).
+1. Install the integration from the Gladys catalog (Gladys 5.3 or newer).
 2. Accept the access to the **location of your houses**: the weather is the
    one of the house, nothing else to enter.
 3. Check that your house is placed on the map (**Settings → Houses**).

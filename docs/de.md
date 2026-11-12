@@ -17,7 +17,7 @@ Pollen, UV und Radar gelten für **Deutschland**.
 
 ## Installation
 
-1. Installiere die Integration aus dem Gladys-Katalog (Gladys 5.2 oder
+1. Installiere die Integration aus dem Gladys-Katalog (Gladys 5.3 oder
    neuer).
 2. Erlaube den Zugriff auf den **Standort deiner Häuser**: das Wetter ist das
    des Zuhauses, sonst ist nichts einzugeben.
